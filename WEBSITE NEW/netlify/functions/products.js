@@ -34,7 +34,12 @@ exports.handler = async (event) => {
     return { statusCode: 204, headers, body: '' };
   }
 
-  const store = getStore({ name: 'qismet-products', consistency: 'strong' });
+  const store = getStore({
+    name: 'qismet-products',
+    consistency: 'strong',
+    siteID: process.env.NETLIFY_SITE_ID,
+    token: process.env.NETLIFY_API_TOKEN,
+  });
 
   // ── GET: list products (public, no auth needed) ──
   if (event.httpMethod === 'GET') {
@@ -68,7 +73,7 @@ exports.handler = async (event) => {
 
     const existing = await store.get(sku, { type: 'json' });
     if (existing) {
-      return { statusCode: 409, headers, body: JSON.stringify({ error: `SKU "${sku}" already exists` }) };
+      return { statusCode: 409, headers, body: JSON.stringify({ error: SKU "${sku}" already exists }) };
     }
 
     const product = {
