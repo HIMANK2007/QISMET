@@ -41,29 +41,119 @@ exports.handler = async (event) => {
     token: process.env.NETLIFY_API_TOKEN,
   });
 
-  // ── GET: list products (public, no auth needed) ──
-  if (event.httpMethod === 'GET') {
+const { getStore } = require('@netlify/blobs');
+const crypto = require('crypto');
+
+function verifyAuth(authHeader) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
+
+  const token = authHeader.slice(7);
+
+  if (!token.includes('.')) return false;
+
+  const [expires, sig] = token.split('.');
+
+  if (parseInt(expires) < Date.now()) return false;
+
+  const secret =
+    process.env.SESSION_SECRET ||
+    'fallback-secret-change-me';
+
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(expires)
+    .digest('hex');
+
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(sig),
+      Buffer.from(expected)
+    );
+  } catch {
+    return false;
+  }
+}
+
+exports.handler = async (event) => {
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin":
+      process.env.SITE_URL || "*",
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization",
+    "Access-Control-Allow-Methods":
+      "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  };
+
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 204,
+      headers,
+      body: ""
+    };
+  }
+
+  const store = getStore({
+    name: "qismet-products",
+    consistency: "strong",
+    siteID: process.env.NETLIFY_SITE_ID,
+    token: process.env.NETLIFY_API_TOKEN
+  });
+
+  // ============================
+  // PUBLIC GET
+  // ============================
+
+  if (event.httpMethod === "GET") {
+
     const { blobs } = await store.list();
+
     const products = [];
-    for (const b of blobs) {
-      const data = await store.get(b.key, { type: 'json' });
-      if (data) products.push(data);
+
+    for (const blob of blobs) {
+
+      const product =
+        await store.get(blob.key, {
+          type: "json"
+        });
+
+      if (product)
+        products.push(product);
+
     }
-    products.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-    return { statusCode: 200, headers, body: JSON.stringify({ products }) };
+
+    products.sort(
+      (a, b) =>
+        (b.createdAt || 0) -
+        (a.createdAt || 0)
+    );
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        count: products.length,
+        products
+      })
+    };
+
   }
 
-  // Everything past this point requires admin auth
+  // Everything below requires admin login
+
   if (!verifyAuth(event.headers.authorization)) {
-    return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
 
-  // ── POST: add a product ──
-  if (event.httpMethod === 'POST') {
-    let body;
-    try { body = JSON.parse(event.body); } catch {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) };
-    }
+    return {
+      statusCode: 401,
+      headers,
+      body: JSON.stringify({
+        error: "Unauthorized"
+      })
+    };
+
+  }
 
     const { sku, name, price, comparePrice, category, status, fabric, colour, description, badge, sizes, swatch, media, sizeChart } = body;
 
