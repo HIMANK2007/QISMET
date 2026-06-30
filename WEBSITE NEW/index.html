@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QISMET — Fated to be Worn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F5EDD4; --bg2:#EDE5C4; --surface:#FFFAF0;
+  --burgundy:#7B1C2E; --burgundy2:#5A1220;
+  --teal:#2E7D6B; --teal2:#4AA892;
+  --gold:#B8860B; --gold2:#D4A820;
+  --ink:#2A1018; --muted:#8A7060;
+  --border:rgba(46,125,107,0.32); --borderc:rgba(123,28,46,0.22);
+  --ff-h:'Playfair Display',serif;
+  --ff-d:'Cinzel',serif;
+  --ff-b:'Cormorant Garamond',serif;
+  --ff-l:'Crimson Pro',serif;
+}
+body.dk{--bg:#0D0905;--bg2:#150C08;--surface:#1A1008;--burgundy:#C9973A;--burgundy2:#E8C97A;--teal:#C9973A;--teal2:#E8C97A;--gold:#C9973A;--gold2:#E8C97A;--ink:#F5EDD4;--muted:#9A8B7A;--border:rgba(201,151,58,0.35);--borderc:rgba(201,151,58,0.2);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ink);font-family:var(--ff-b);font-size:18px;line-height:1.6;overflow-x:hidden;transition:background .5s,color .5s;}
+
+/* ═══════════════════════════════════════
+   INTRO STAGE
+═══════════════════════════════════════ */
+#stage{position:fixed;inset:0;z-index:9999;overflow:hidden;cursor:pointer;}
+#wall{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,#2C1A0A 0%,#180D05 50%,#0A0603 100%);transition:opacity .8s;}
+#wall::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(88deg,transparent 0,transparent 55px,rgba(255,200,80,.022) 55px,rgba(255,200,80,.022) 56px),repeating-linear-gradient(2deg,transparent 0,transparent 28px,rgba(255,180,60,.018) 28px,rgba(255,180,60,.018) 29px);}
+#wall::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 180px 400px at 8% 50%,rgba(255,140,30,.14) 0%,transparent 100%),radial-gradient(ellipse 180px 400px at 92% 50%,rgba(255,140,30,.14) 0%,transparent 100%);animation:ta 4s ease-in-out infinite alternate;}
+@keyframes ta{from{opacity:.6}to{opacity:1}}
+
+/* torches */
+.torch{position:absolute;top:20%;z-index:2;transition:opacity .6s;}
+.torch.L{left:5%}.torch.R{right:5%}
+.t-pole{width:6px;height:88px;background:linear-gradient(to bottom,#5C2A08,#3A1A04);margin:0 auto;border-radius:3px;}
+.t-head{width:20px;height:28px;background:linear-gradient(to bottom,#FF8C00,#CC4400);border-radius:50% 50% 30% 30%;margin:0 auto -4px;}
+.t-flame{width:16px;height:36px;margin:-30px auto 0;background:radial-gradient(ellipse at 50% 90%,#FF8C00 0%,#FF4500 40%,rgba(255,69,0,0) 100%);border-radius:50% 50% 20% 20%;animation:fl .5s ease-in-out infinite alternate;filter:blur(1.5px);}
+.t-glow{position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:80px;height:80px;background:radial-gradient(ellipse,rgba(255,140,30,.42) 0%,transparent 70%);animation:fl .5s ease-in-out infinite alternate;}
+@keyframes fl{0%{opacity:.7;transform:scaleX(1) scaleY(1)}33%{opacity:1;transform:scaleX(.9) scaleY(1.08)}66%{opacity:.8;transform:scaleX(1.1) scaleY(.95)}100%{opacity:.9;transform:scaleX(.95) scaleY(1.05)}}
+
+/* 3-D door */
+#dp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;perspective:2200px;perspective-origin:50% 48%;transition:opacity .8s;}
+#dw{position:relative;width:min(360px,72vw);height:min(620px,84vh);transform-style:preserve-3d;}
+#arch{position:absolute;top:-72px;left:-90px;right:-90px;bottom:-8px;pointer-events:none;z-index:10;filter:drop-shadow(0 0 40px rgba(0,0,0,.9));}
+.dh{position:absolute;top:0;height:100%;width:50%;transform-style:preserve-3d;will-change:transform;transition:transform 1.8s cubic-bezier(.77,0,.18,1);}
+#dL{left:0;transform-origin:left center;}
+#dR{right:0;transform-origin:right center;}
+.df{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(120,65,15,.9) 0%,transparent 55%),radial-gradient(ellipse at 70% 80%,rgba(80,35,5,.8) 0%,transparent 55%),linear-gradient(175deg,#6B3510,#8B4A18 12%,#5C2A08 30%,#4A2005 55%,#3A1804 75%,#2A1203);overflow:hidden;}
+#dR .df{background:radial-gradient(ellipse at 70% 20%,rgba(120,65,15,.9) 0%,transparent 55%),radial-gradient(ellipse at 30% 80%,rgba(80,35,5,.8) 0%,transparent 55%),linear-gradient(185deg,#6B3510,#8B4A18 12%,#5C2A08 30%,#4A2005 55%,#3A1804 75%,#2A1203);}
+.df::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(176deg,transparent 0,transparent 9px,rgba(180,90,20,.07) 9px,rgba(180,90,20,.07) 10px,transparent 10px,transparent 21px,rgba(100,45,8,.05) 21px,rgba(100,45,8,.05) 22px,transparent 22px,transparent 35px,rgba(200,110,30,.04) 35px,rgba(200,110,30,.04) 36px);}
+.df::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,200,80,.08) 0%,transparent 40%,rgba(0,0,0,.25) 100%);}
+.bs{position:absolute;left:8%;right:8%;height:10px;background:linear-gradient(to bottom,#D4A820,#8B6914,#C9973A,#7A5800,#D4A820);box-shadow:0 1px 4px rgba(0,0,0,.6),inset 0 1px 1px rgba(255,220,80,.4);z-index:2;}
+.bs.bt{top:6%}.bs.bm{top:48%}.bs.bb{bottom:6%}
+.bs::before,.bs::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFD700,#8B6914);box-shadow:0 1px 3px rgba(0,0,0,.5);}
+.bs::before{left:6px}.bs::after{right:6px}
+.dpan{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;padding:8% 10% 8%;gap:3%;}
+.dp2{flex:1;border:2.5px solid rgba(180,130,30,.6);position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(0,0,0,.25) 0%,rgba(120,60,10,.1) 50%,rgba(0,0,0,.3) 100%);box-shadow:inset 3px 3px 8px rgba(0,0,0,.4),inset -2px -2px 6px rgba(180,130,30,.15);}
+.dp2::before{content:'';position:absolute;inset:5px;border:1px solid rgba(180,130,30,.3);}
+.dp2::after{content:'';position:absolute;inset:10px;border:1px solid rgba(180,130,30,.12);}
+.psv{width:62%;height:62%;opacity:.55;position:relative;z-index:2;}
+#knocker{position:absolute;top:42%;right:10%;z-index:5;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.kbp{width:30px;height:48px;background:linear-gradient(145deg,#D4A820,#8B6914,#C9973A,#7A5800);border-radius:4px 4px 12px 12px;box-shadow:2px 2px 8px rgba(0,0,0,.7),inset 0 1px 2px rgba(255,220,80,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.kf{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 32%,#FFD700,#8B6014);box-shadow:0 1px 4px rgba(0,0,0,.6);}
+.kr{width:24px;height:28px;border:4px solid #C9973A;border-radius:50%;background:transparent;box-shadow:2px 2px 8px rgba(0,0,0,.6),0 0 12px rgba(200,150,40,.3);transform:rotate(15deg);}
+#kh{position:absolute;top:44%;left:12%;z-index:5;}
+.khe{width:22px;height:32px;background:linear-gradient(145deg,#C9973A,#7A5800);border-radius:3px;box-shadow:1px 1px 4px rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;}
+.khs{width:10px;height:18px;background:#0A0500;clip-path:polygon(50% 0%,100% 35%,100% 50%,65% 50%,65% 100%,35% 100%,35% 50%,0% 50%,0% 35%);}
+.ddep{position:absolute;top:0;bottom:0;width:18px;background:linear-gradient(to right,#060300,#150900 50%,#060300);}
+#dL .ddep{right:0;transform-origin:right;transform:rotateY(-90deg);}
+#dR .ddep{left:0;transform-origin:left;transform:rotateY(90deg);}
+#seam{position:absolute;top:0;bottom:0;left:50%;width:4px;transform:translateX(-50%);background:linear-gradient(to bottom,transparent 0%,rgba(255,220,120,.05) 15%,rgba(255,220,100,.9) 50%,rgba(255,220,120,.05) 85%,transparent 100%);z-index:8;filter:blur(1px);animation:sg 2s ease-in-out infinite;}
+@keyframes sg{0%,100%{opacity:.35}50%{opacity:1}}
+#enter{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);font-family:var(--ff-d);font-size:11px;letter-spacing:.5em;color:rgba(212,168,32,.8);white-space:nowrap;z-index:12;animation:bl 2.2s ease-in-out infinite;user-select:none;}
+@keyframes bl{0%,100%{opacity:.25}55%{opacity:1}}
+#dlight{position:absolute;inset:0;z-index:4;background:radial-gradient(ellipse at center,rgba(255,230,150,.55) 0%,rgba(255,200,80,.15) 35%,transparent 65%);opacity:0;pointer-events:none;transition:opacity .4s;}
+#dlight.on{opacity:1}#dlight.off{opacity:0;transition:opacity 1.2s ease .2s;}
+
+/* ═══ JAIPUR REVEAL ═══ */
+#jr{position:absolute;inset:0;z-index:5;opacity:0;pointer-events:none;transition:opacity .9s;background:#000;}
+#jr.vis{opacity:1;pointer-events:all;}
+.jsky{position:absolute;inset:0;background:linear-gradient(to bottom,#D4460A 0%,#E8622A 8%,#F07840 16%,#F5963A 26%,#FAB540 36%,#FCC84A 48%,#FFD870 60%,#B8D8F0 78%,#90C4E8 100%);}
+.jsun{position:absolute;top:26%;left:50%;transform:translateX(-50%);width:100px;height:100px;background:radial-gradient(circle,#FFFDE7 0%,#FFD740 30%,rgba(255,200,40,0) 72%);border-radius:50%;box-shadow:0 0 70px 35px rgba(255,200,40,.38),0 0 140px 70px rgba(255,150,20,.22);animation:sp 4s ease-in-out infinite alternate;}
+@keyframes sp{from{box-shadow:0 0 70px 35px rgba(255,200,40,.38),0 0 140px 70px rgba(255,150,20,.22)}to{box-shadow:0 0 90px 45px rgba(255,220,60,.48),0 0 180px 90px rgba(255,170,30,.3)}}
+.jsil{position:absolute;bottom:0;left:0;right:0;background-repeat:repeat-x;background-position:bottom center;background-size:auto 100%;}
+.lhills{height:28%;bottom:38%;background:radial-gradient(ellipse 200px 120px at 20% 100%,#C4785A 0%,transparent 60%),radial-gradient(ellipse 300px 150px at 50% 100%,#BF7050 0%,transparent 60%),radial-gradient(ellipse 250px 130px at 80% 100%,#C4785A 0%,transparent 60%);opacity:.45;}
+.lground{height:20%;bottom:0;background:linear-gradient(to top,#D4A96A 0%,#C89858 40%,rgba(200,152,88,0) 100%);}
+.dust{position:absolute;border-radius:50%;background:rgba(255,200,100,.6);animation:df2 linear infinite;}
+@keyframes df2{from{transform:translateX(0) translateY(0) scale(1);opacity:.7}to{transform:translateX(var(--dx)) translateY(-60px) scale(.3);opacity:0}}
+.jcap{position:absolute;bottom:28%;left:50%;transform:translateX(-50%);text-align:center;z-index:5;animation:cr 1.2s ease .4s both;}
+@keyframes cr{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.jcap h2{font-family:var(--ff-h);font-size:clamp(28px,5vw,58px);font-weight:900;font-style:italic;color:#FFFDE7;text-shadow:0 2px 30px rgba(0,0,0,.5),0 0 60px rgba(255,200,60,.4);letter-spacing:.05em;}
+.jcap p{font-family:var(--ff-d);font-size:11px;letter-spacing:.4em;color:rgba(255,240,200,.8);margin-top:.5rem;text-shadow:0 1px 10px rgba(0,0,0,.4);}
+#curtain{position:absolute;inset:0;z-index:20;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .9s;}
+#curtain.cl{opacity:1;}
+
+/* ═══ STRIP ═══ */
+.strip{background:var(--burgundy);color:var(--bg);font-family:var(--ff-d);font-size:10px;letter-spacing:.25em;font-weight:600;padding:8px 0;overflow:hidden;white-space:nowrap;}
+.si{display:inline-block;animation:mq 32s linear infinite;}
+.si span{margin:0 2.5rem;}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ═══ NAV ═══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 3rem;background:rgba(245,237,212,.97);border-bottom:2px solid var(--teal);transition:all .4s;}
+.nlogo{font-family:var(--ff-h);font-size:26px;font-weight:900;font-style:italic;color:var(--burgundy);text-decoration:none;line-height:1;}
+.nlogo .ns{font-family:var(--ff-d);font-size:8px;letter-spacing:.35em;color:var(--teal);font-style:normal;display:block;margin-top:1px;font-weight:400;}
+.nl{display:flex;gap:2rem;list-style:none;}
+.nl a{font-family:var(--ff-d);font-size:10px;letter-spacing:.18em;color:var(--ink);text-decoration:none;opacity:.75;transition:all .2s;}
+.nl a:hover{opacity:1;color:var(--burgundy);}
+.na{display:flex;align-items:center;gap:1.2rem;}
+.na button{background:none;border:none;cursor:pointer;font-family:var(--ff-d);font-size:10px;letter-spacing:.18em;color:var(--ink);opacity:.75;transition:all .2s;}
+.na button:hover{opacity:1;color:var(--burgundy);}
+.cbtn{border:1.5px solid var(--teal)!important;padding:6px 16px!important;color:var(--teal)!important;opacity:1!important;}
+.abtn{background:var(--burgundy)!important;color:var(--bg)!important;border:none!important;padding:7px 18px!important;opacity:1!important;font-weight:600!important;}
+
+/* ═══ HERO ═══ */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;background:var(--bg);}
+.h-jali{position:absolute;inset:0;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='18' stroke='%237B1C2E' stroke-width='.6' fill='none'/%3E%3Ccircle cx='40' cy='40' r='10' stroke='%232E7D6B' stroke-width='.4' fill='none'/%3E%3Cpath d='M0 40h80M40 0v80' stroke='%237B1C2E' stroke-width='.3'/%3E%3C/svg%3E");}
+.h-al{position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(to bottom,var(--teal),var(--burgundy),var(--teal));}
+.h-ar{position:absolute;right:0;top:0;bottom:0;width:6px;background:linear-gradient(to bottom,var(--teal),var(--burgundy),var(--teal));}
+.hcont{position:relative;z-index:2;width:100%;padding:8rem 5rem 5rem;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:4rem;}
+.hey{font-family:var(--ff-d);font-size:10px;letter-spacing:.42em;color:var(--teal);margin-bottom:1.4rem;display:flex;align-items:center;gap:1rem;}
+.hey::before{content:'';display:block;width:38px;height:1.5px;background:var(--teal);}
+.htitle{font-family:var(--ff-h);font-size:clamp(48px,7vw,94px);font-weight:900;line-height:.88;color:var(--burgundy);margin-bottom:2rem;}
+.htitle .ghost{color:transparent;-webkit-text-stroke:1.5px var(--teal);display:block;font-style:italic;}
+.hctas{display:flex;gap:1rem;flex-wrap:wrap;}
+.bp{background:var(--burgundy);color:var(--bg);border:1.5px solid var(--burgundy);font-family:var(--ff-d);font-size:10px;letter-spacing:.25em;font-weight:600;padding:14px 30px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-block;}
+.bp:hover{background:var(--burgundy2);transform:translateY(-2px);}
+.bg2{background:transparent;color:var(--teal);border:1.5px solid var(--teal);font-family:var(--ff-d);font-size:10px;letter-spacing:.25em;padding:14px 30px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-block;}
+.bg2:hover{background:var(--teal);color:var(--bg);}
+.hright{display:flex;flex-direction:column;gap:2rem;align-items:flex-end;}
+.hst .num{font-family:var(--ff-h);font-size:54px;font-weight:900;color:var(--burgundy);line-height:1;}
+.hst .lbl{font-family:var(--ff-l);font-size:13px;letter-spacing:.2em;color:var(--muted);font-style:italic;}
+.htag{font-family:var(--ff-l);font-size:19px;font-style:italic;color:var(--muted);max-width:300px;text-align:right;line-height:1.5;}
+
+/* big decorative Q watermark */
+.hero-q{position:absolute;right:-2%;top:50%;transform:translateY(-50%);font-family:var(--ff-h);font-size:clamp(280px,38vw,520px);font-weight:900;font-style:italic;color:transparent;-webkit-text-stroke:1px rgba(123,28,46,.07);line-height:1;pointer-events:none;user-select:none;z-index:1;}
+
+/* ═══ MARQUEE ═══ */
+.cmw{padding:2.5rem 0;overflow:hidden;border-top:1.5px solid var(--border);border-bottom:1.5px solid var(--border);background:var(--bg2);}
+.cmar{display:flex;gap:2.5rem;animation:mq 22s linear infinite;white-space:nowrap;}
+.ci{display:flex;align-items:center;gap:1.2rem;font-family:var(--ff-d);font-size:12px;letter-spacing:.2em;color:var(--muted);text-decoration:none;flex-shrink:0;transition:color .2s;}
+.ci:hover{color:var(--burgundy);}
+.ci::after{content:'✦';color:var(--teal);font-size:9px;}
+
+/* ═══ DIVIDER ═══ */
+.od{display:flex;align-items:center;justify-content:center;gap:1.5rem;padding:0 3rem;}
+.od .ln{flex:1;height:1.5px;background:linear-gradient(to right,transparent,var(--teal),transparent);}
+.od .sy{color:var(--burgundy);font-size:18px;font-family:var(--ff-d);}
+
+/* ═══ COLLECTIONS ═══ */
+.sec-e{font-family:var(--ff-d);font-size:10px;letter-spacing:.42em;color:var(--teal);text-align:center;margin-bottom:.8rem;}
+.sec-t{font-family:var(--ff-h);font-size:clamp(28px,4vw,50px);font-weight:900;text-align:center;color:var(--burgundy);line-height:1.05;}
+.sec-s{font-family:var(--ff-l);font-size:17px;font-style:italic;color:var(--muted);text-align:center;margin-top:.5rem;}
+.collections{padding:5rem 3rem;background:var(--bg);}
+.cgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr;grid-template-rows:400px 260px;gap:12px;}
+.cc{position:relative;overflow:hidden;cursor:pointer;display:flex;align-items:flex-end;border:1.5px solid var(--border);}
+.cc:first-child{grid-row:1/3;}
+.cbg{position:absolute;inset:0;transition:transform .7s cubic-bezier(.25,.1,.25,1);}
+.cc:hover .cbg{transform:scale(1.06);}
+.c1{background:radial-gradient(ellipse at 30% 60%,rgba(123,28,46,.75) 0%,transparent 65%),linear-gradient(155deg,#2A0810,#4A1020,#1A0508);}
+.c2{background:radial-gradient(ellipse at 60% 40%,rgba(46,125,107,.75) 0%,transparent 60%),linear-gradient(135deg,#081A14,#0F2820,#060E0A);}
+.c3{background:radial-gradient(ellipse at 50% 50%,rgba(13,90,60,.8) 0%,transparent 60%),linear-gradient(135deg,#051510,#0A2018,#030C08);}
+.c4{background:radial-gradient(ellipse at 40% 60%,rgba(92,42,8,.8) 0%,transparent 60%),linear-gradient(135deg,#120800,#201204,#0D0A02);}
+.c5{background:radial-gradient(ellipse at 60% 40%,rgba(62,8,40,.8) 0%,transparent 60%),linear-gradient(135deg,#100510,#1A0A18,#0A0508);}
+.cpat{position:absolute;inset:0;opacity:.1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5L35 25L55 30L35 35L30 55L25 35L5 30L25 25Z' stroke='%23C9973A' stroke-width='.6' fill='none'/%3E%3Ccircle cx='30' cy='30' r='4' stroke='%23C9973A' stroke-width='.4' fill='none'/%3E%3C/svg%3E");}
+.cov{position:absolute;inset:0;background:linear-gradient(to top,rgba(5,2,1,.94) 0%,rgba(5,2,1,.2) 55%,transparent 100%);}
+.ci2{position:relative;z-index:2;padding:1.8rem;width:100%;}
+.ci2 .tag{font-family:var(--ff-d);font-size:9px;letter-spacing:.35em;color:var(--teal2);margin-bottom:.4rem;display:block;}
+.ci2 h3{font-family:var(--ff-h);font-size:clamp(18px,2.5vw,28px);font-weight:900;line-height:1.05;margin-bottom:.6rem;color:#F5EDD4;}
+.clnk{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--ff-d);font-size:9px;letter-spacing:.3em;color:var(--gold2);text-decoration:none;border-bottom:1px solid rgba(212,168,32,.4);padding-bottom:2px;}
+.clnk::after{content:'→';}
+
+/* ═══ PRODUCTS ═══ */
+.drops{padding:5rem 3rem;background:var(--bg2);}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.pc{position:relative;cursor:pointer;}
+.pi{aspect-ratio:3/4;position:relative;overflow:hidden;margin-bottom:1rem;border:1.5px solid var(--border);}
+.s1{background:linear-gradient(135deg,#3D0A14,#8B1C2E,#5C1218);}
+.s2{background:linear-gradient(135deg,#08201A,#1A5C48,#0F3A2E);}
+.s3{background:linear-gradient(135deg,#0A1A0A,#1A5C28,#0F3A18);}
+.s4{background:linear-gradient(135deg,#2A1A0A,#5C3A1A,#3A2210);}
+.s5{background:linear-gradient(135deg,#1A0A2A,#3A1A5C,#251035);}
+.s6{background:linear-gradient(135deg,#2A2200,#5C4A00,#3A3000);}
+.s7{background:linear-gradient(135deg,#0A2A2A,#1A5C5C,#103838);}
+.s8{background:linear-gradient(135deg,#2A0A0A,#5C1C1C,#3A1010);}
+.pi::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M20 2L22 18L38 20L22 22L20 38L18 22L2 20L18 18Z' stroke='%23C9973A' stroke-width='.4' fill='none' opacity='.2'/%3E%3C/svg%3E");opacity:.4;}
+.pb{position:absolute;top:10px;left:10px;background:var(--burgundy);color:var(--bg);font-family:var(--ff-d);font-size:8px;letter-spacing:.2em;font-weight:600;padding:4px 10px;z-index:2;}
+.pb.so{background:rgba(245,237,212,.15);color:var(--bg);}
+.pq{position:absolute;bottom:0;left:0;right:0;background:var(--teal);color:var(--bg);font-family:var(--ff-d);font-size:9px;letter-spacing:.25em;font-weight:600;text-align:center;padding:10px;transform:translateY(100%);transition:transform .3s;border:none;cursor:pointer;z-index:3;}
+.pc:hover .pq{transform:translateY(0);}
+.pn{font-family:var(--ff-b);font-size:16px;font-weight:600;margin-bottom:.2rem;color:var(--ink);}
+.pp{font-family:var(--ff-d);font-size:13px;letter-spacing:.1em;color:var(--burgundy);}
+.pp .or{text-decoration:line-through;color:var(--muted);margin-right:.4rem;font-size:12px;}
+
+/* ═══ STORY ═══ */
+.story{padding:7rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:7rem;align-items:center;border-top:1.5px solid var(--border);border-bottom:1.5px solid var(--border);background:var(--bg);}
+.sv{position:relative;aspect-ratio:4/5;}
+.svb{position:absolute;inset:0;background:radial-gradient(ellipse at 40% 30%,rgba(123,28,46,.15) 0%,transparent 50%),linear-gradient(145deg,var(--bg2),var(--bg));border:1.5px solid var(--border);}
+.svp{position:absolute;inset:0;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='35' stroke='%237B1C2E' stroke-width='.6' fill='none'/%3E%3Cpath d='M50 5L53 47L95 50L53 53L50 95L47 53L5 50L47 47Z' stroke='%232E7D6B' stroke-width='.5' fill='none'/%3E%3C/svg%3E");}
+.svf{position:absolute;inset:20px;border:1px solid var(--borderc);}
+.svf::before{content:'';position:absolute;inset:8px;border:1px solid rgba(46,125,107,.15);}
+.svn{position:absolute;bottom:-16px;right:-16px;width:110px;height:110px;background:var(--burgundy);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;}
+.svn .yr{font-family:var(--ff-h);font-size:26px;font-weight:900;color:var(--bg);line-height:1;}
+.svn .yl{font-family:var(--ff-d);font-size:8px;letter-spacing:.2em;color:rgba(245,237,212,.7);}
+.st .pre{font-family:var(--ff-d);font-size:10px;letter-spacing:.42em;color:var(--teal);margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
+.st .pre::before{content:'';display:block;width:28px;height:1.5px;background:var(--teal);}
+.st h2{font-family:var(--ff-h);font-size:clamp(28px,3.5vw,44px);font-weight:900;line-height:1.05;margin-bottom:1.5rem;color:var(--burgundy);}
+.st h2 em{font-style:italic;color:var(--teal);}
+.st p{font-family:var(--ff-l);font-size:18px;line-height:1.75;color:var(--muted);margin-bottom:1.5rem;}
+.pillars{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;}
+.pil{border-left:3px solid var(--teal);padding-left:1rem;}
+.pil .pt{font-family:var(--ff-d);font-size:10px;letter-spacing:.2em;color:var(--teal);margin-bottom:.25rem;font-weight:600;}
+.pil p{font-family:var(--ff-l);font-size:14px;color:var(--muted);margin:0;line-height:1.4;}
+
+/* ═══ LOOKBOOK ═══ */
+.lb{padding:5rem 0;background:var(--bg2);border-top:1.5px solid var(--border);}
+.lbh{padding:0 3rem;margin-bottom:2.5rem;display:flex;align-items:flex-end;justify-content:space-between;}
+.lbh h2{font-family:var(--ff-h);font-size:28px;font-weight:900;color:var(--burgundy);}
+.lbr{display:flex;gap:10px;padding:0 3rem;overflow-x:auto;scrollbar-width:none;}
+.lbr::-webkit-scrollbar{display:none;}
+.lk{flex-shrink:0;width:270px;}
+.lki{aspect-ratio:2/3;position:relative;overflow:hidden;margin-bottom:.8rem;border:1.5px solid var(--border);}
+.lb1{background:linear-gradient(145deg,#1A0808,#4A1414,#8B1A1A);}
+.lb2{background:linear-gradient(145deg,#061A14,#0F4A34,#1A8B6A);}
+.lb3{background:linear-gradient(145deg,#0A1A0A,#144A14,#1A8B1A);}
+.lb4{background:linear-gradient(145deg,#1A1200,#4A3400,#8B6200);}
+.lov{position:absolute;inset:0;background:linear-gradient(to top,rgba(5,2,1,.75) 0%,transparent 55%);}
+.lnum{position:absolute;top:14px;right:14px;font-family:var(--ff-d);font-size:9px;letter-spacing:.2em;color:var(--teal2);background:rgba(5,2,1,.6);padding:3px 9px;}
+.lcap{position:absolute;bottom:14px;left:14px;right:14px;}
+.lcap .ln2{font-family:var(--ff-h);font-size:15px;font-weight:700;color:#F5EDD4;}
+.lcap .lp{font-family:var(--ff-d);font-size:11px;letter-spacing:.1em;color:var(--teal2);}
+
+/* ═══ TESTIMONIALS ═══ */
+.testi{padding:5rem 3rem;background:var(--bg);border-top:1.5px solid var(--border);}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.8rem;margin-top:3rem;}
+.tc{border:1.5px solid var(--border);padding:2.2rem;position:relative;background:var(--surface);}
+.tc::before{content:'"';position:absolute;top:16px;left:20px;font-family:var(--ff-h);font-size:72px;color:var(--teal);opacity:.15;line-height:1;}
+.stars{color:var(--gold);font-size:13px;letter-spacing:.1em;margin-bottom:.8rem;}
+.tt{font-family:var(--ff-l);font-size:17px;font-style:italic;line-height:1.65;color:var(--muted);margin-bottom:1.2rem;}
+.ta{font-family:var(--ff-d);font-size:10px;letter-spacing:.25em;color:var(--burgundy);}
+.tl{font-family:var(--ff-l);font-size:13px;color:var(--muted);margin-top:2px;}
+
+/* ═══ PROMISE ═══ */
+.promise{background:var(--burgundy);padding:5rem 3rem;text-align:center;position:relative;overflow:hidden;}
+.promise::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M40 5L43 37L75 40L43 43L40 75L37 43L5 40L37 37Z' stroke='%23F5EDD4' stroke-width='.4' fill='none' opacity='.1'/%3E%3C/svg%3E");}
+.pi2{position:relative;z-index:1;}
+.promise h2{font-family:var(--ff-h);font-size:clamp(24px,4vw,46px);font-weight:900;margin-bottom:.8rem;color:var(--bg);}
+.promise p{font-family:var(--ff-l);font-size:19px;font-style:italic;color:rgba(245,237,212,.75);margin-bottom:2rem;}
+
+/* ═══ NEWSLETTER ═══ */
+.nl2{padding:5rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;border-bottom:1.5px solid var(--border);background:var(--bg);}
+.nl2 h2{font-family:var(--ff-h);font-size:clamp(24px,3vw,38px);font-weight:900;color:var(--burgundy);margin-bottom:.6rem;}
+.nl2 p{font-family:var(--ff-l);font-size:17px;font-style:italic;color:var(--muted);}
+.nlf{display:flex;}
+.nlin{flex:1;background:var(--bg);border:1.5px solid var(--border);border-right:none;padding:13px 18px;color:var(--ink);font-family:var(--ff-l);font-size:16px;outline:none;}
+.nlin::placeholder{color:var(--muted);}
+.nlin:focus{border-color:var(--teal);}
+.nlb{background:var(--teal);color:var(--bg);border:none;padding:13px 22px;font-family:var(--ff-d);font-size:10px;letter-spacing:.25em;font-weight:600;cursor:pointer;transition:background .2s;}
+.nlb:hover{background:var(--teal2);}
+
+/* ═══ FOOTER ═══ */
+footer{background:var(--ink);padding:4rem 3rem 2rem;}
+.ft{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3.5rem;padding-bottom:2.5rem;border-bottom:1px solid rgba(245,237,212,.1);margin-bottom:2rem;}
+.flogo{font-family:var(--ff-h);font-size:28px;font-weight:900;font-style:italic;color:var(--bg);letter-spacing:.03em;}
+.fsub{font-family:var(--ff-l);font-size:12px;font-style:italic;color:var(--teal2);margin-bottom:1rem;}
+.fp{font-family:var(--ff-l);font-size:15px;font-style:italic;color:rgba(245,237,212,.5);line-height:1.6;margin-bottom:1.5rem;}
+.sr{display:flex;gap:.8rem;}
+.sb{width:34px;height:34px;border:1px solid rgba(245,237,212,.2);display:flex;align-items:center;justify-content:center;font-family:var(--ff-d);font-size:10px;color:rgba(245,237,212,.5);text-decoration:none;transition:all .2s;}
+.sb:hover{color:var(--teal2);border-color:var(--teal2);}
+.fc h4{font-family:var(--ff-d);font-size:10px;letter-spacing:.3em;color:var(--teal2);margin-bottom:1.2rem;font-weight:600;}
+.fc ul{list-style:none;}
+.fc ul li{margin-bottom:.6rem;}
+.fc ul a{font-family:var(--ff-l);font-size:15px;color:rgba(245,237,212,.5);text-decoration:none;transition:color .2s;}
+.fc ul a:hover{color:var(--bg);}
+.fb{display:flex;align-items:center;justify-content:space-between;}
+.fb p{font-family:var(--ff-d);font-size:10px;letter-spacing:.2em;color:rgba(245,237,212,.3);}
+
+/* ═══ CMS ═══ */
+#cms-ov{position:fixed;inset:0;z-index:10000;background:rgba(10,6,4,.65);backdrop-filter:blur(6px);display:none;align-items:stretch;justify-content:flex-end;}
+#cms-ov.op{display:flex;}
+#cms-p{width:min(860px,95vw);height:100vh;background:var(--bg);display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.35);overflow:hidden;}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2rem;background:var(--burgundy);border-bottom:3px solid var(--teal);flex-shrink:0;}
+.ct{font-family:var(--ff-h);font-size:20px;font-weight:900;font-style:italic;color:var(--bg);}
+.cs{font-family:var(--ff-d);font-size:9px;letter-spacing:.3em;color:rgba(245,237,212,.65);}
+.cx{background:none;border:none;cursor:pointer;color:var(--bg);font-size:22px;opacity:.8;}
+.cx:hover{opacity:1;}
+.ctabs{display:flex;border-bottom:2px solid var(--border);background:var(--bg2);flex-shrink:0;overflow-x:auto;}
+.ctab{padding:12px 18px;font-family:var(--ff-d);font-size:9px;letter-spacing:.2em;font-weight:600;cursor:pointer;border:none;background:none;color:var(--muted);white-space:nowrap;border-bottom:2.5px solid transparent;transition:all .2s;margin-bottom:-2px;}
+.ctab.ac{color:var(--burgundy);border-bottom-color:var(--burgundy);}
+.ctab:hover:not(.ac){color:var(--teal);}
+.cbody{flex:1;overflow-y:auto;padding:2rem;}
+.cpane{display:none;}
+.cpane.ac{display:block;}
+.csh{font-family:var(--ff-h);font-size:18px;font-weight:900;color:var(--burgundy);margin-bottom:1.2rem;padding-bottom:.6rem;border-bottom:1.5px solid var(--border);}
+.cgr{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.8rem;}
+.cf{display:flex;flex-direction:column;gap:.4rem;}
+.cf label{font-family:var(--ff-d);font-size:9px;letter-spacing:.25em;color:var(--teal);font-weight:600;}
+.cf input,.cf select,.cf textarea{background:var(--surface);border:1.5px solid var(--border);padding:10px 14px;color:var(--ink);font-family:var(--ff-l);font-size:15px;outline:none;transition:border-color .2s;}
+.cf input:focus,.cf select:focus,.cf textarea:focus{border-color:var(--burgundy);}
+.cf textarea{min-height:80px;resize:vertical;}
+.cbtn2{background:var(--burgundy);color:var(--bg);border:none;font-family:var(--ff-d);font-size:10px;letter-spacing:.25em;font-weight:600;padding:12px 24px;cursor:pointer;transition:background .2s;display:inline-flex;align-items:center;gap:.5rem;}
+.cbtn2:hover{background:var(--burgundy2);}
+.cbtn2.tl{background:var(--teal);}
+.cbtn2.gh{background:transparent;color:var(--burgundy);border:1.5px solid var(--burgundy);}
+.cbtn2.gh:hover{background:var(--burgundy);color:var(--bg);}
+.cbtn2.dg{background:#8B1A1A;}
+.crow{display:flex;align-items:center;gap:1rem;margin-bottom:1.8rem;flex-wrap:wrap;}
+.cpc{display:flex;align-items:center;gap:1.2rem;background:var(--surface);border:1.5px solid var(--border);padding:1rem 1.2rem;margin-bottom:.8rem;}
+.cpsw{width:52px;height:52px;flex-shrink:0;border:1.5px solid var(--borderc);}
+.cpi{flex:1;}.cpi .n{font-family:var(--ff-b);font-size:16px;font-weight:600;color:var(--ink);}.cpi .m{font-family:var(--ff-d);font-size:9px;letter-spacing:.15em;color:var(--muted);}
+.cpa{display:flex;gap:.5rem;}
+.np-media-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.np-media-grid img,.np-media-grid .npc-pdf{width:60px;height:60px;object-fit:cover;border:1.5px solid var(--borderc);border-radius:2px;}
+.np-media-grid .npc-pdf{display:flex;align-items:center;justify-content:center;background:var(--burgundy);color:var(--bg);font-size:9px;font-family:var(--ff-d);letter-spacing:.05em;text-align:center;}
+.np-size-row{display:flex;flex-wrap:wrap;gap:.6rem;}
+.np-chip{display:flex;align-items:center;gap:.4rem;border:1.5px solid var(--border);padding:7px 14px;font-family:var(--ff-d);font-size:10px;letter-spacing:.1em;cursor:pointer;color:var(--muted);transition:all .15s;background:var(--surface);}
+.np-chip:has(input:checked){border-color:var(--burgundy);color:var(--burgundy);background:rgba(123,28,46,.06);}
+.np-chip input{accent-color:var(--burgundy);}
+.cpc{animation:cpcIn .3s ease both;}
+@keyframes cpcIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.cpc.removing{animation:cpcOut .25s ease forwards;}
+@keyframes cpcOut{to{opacity:0;transform:translateX(20px) scale(.96);max-height:0;margin:0;padding:0;border-width:0;}}
+.ib{background:none;border:1.5px solid var(--border);width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:all .2s;}
+.ib:hover{border-color:var(--burgundy);color:var(--burgundy);}
+.ib.dl:hover{border-color:#8B1A1A;color:#8B1A1A;}
+.trow{display:flex;align-items:center;justify-content:space-between;padding:.8rem 0;border-bottom:1px solid rgba(46,125,107,.15);}
+.trow:last-child{border-bottom:none;}
+.tl2{font-family:var(--ff-l);font-size:15px;color:var(--ink);}
+.tl2 small{display:block;font-size:12px;color:var(--muted);font-style:italic;}
+.tsw{position:relative;width:46px;height:26px;cursor:pointer;flex-shrink:0;}
+.tsw input{opacity:0;width:0;height:0;}
+.tsl{position:absolute;inset:0;background:rgba(46,125,107,.2);border:1.5px solid var(--border);transition:.3s;}
+.tsl:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:var(--muted);transition:.3s;}
+.tsw input:checked+.tsl{background:var(--teal);border-color:var(--teal);}
+.tsw input:checked+.tsl:before{transform:translateX(20px);background:white;}
+.cpnc{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--border);padding:1rem 1.2rem;margin-bottom:.8rem;}
+.pcode{font-family:var(--ff-d);font-size:14px;letter-spacing:.2em;color:var(--burgundy);font-weight:600;}
+.pmeta{font-family:var(--ff-l);font-size:14px;color:var(--muted);font-style:italic;}
+.pb2{font-family:var(--ff-d);font-size:9px;letter-spacing:.15em;padding:3px 10px;}
+.pb2.ac{background:var(--teal);color:var(--bg);}.pb2.ex{background:rgba(123,28,46,.15);color:var(--burgundy);}
+.thsw{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+.ths{aspect-ratio:1;cursor:pointer;border:3px solid transparent;transition:border-color .2s;position:relative;overflow:hidden;display:flex;align-items:flex-end;}
+.ths.sel{border-color:var(--teal);}
+.thl{font-family:var(--ff-d);font-size:8px;letter-spacing:.15em;padding:6px 8px;width:100%;background:rgba(0,0,0,.5);color:white;}
+.swl{background:linear-gradient(135deg,#F5EDD4,#EDE5C4);}.swd{background:linear-gradient(135deg,#0D0905,#2A1608);}
+.clg{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+.clf{display:flex;flex-direction:column;gap:.4rem;align-items:center;}
+.clf label{font-family:var(--ff-d);font-size:9px;letter-spacing:.2em;color:var(--teal);}
+.clf input[type=color]{width:100%;height:44px;border:1.5px solid var(--border);cursor:pointer;padding:2px;background:var(--bg);}
+.upz{border:2px dashed var(--border);padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);margin-bottom:1.5rem;}
+.upz:hover{border-color:var(--teal);background:rgba(46,125,107,.04);}
+.upz .ico{font-size:32px;margin-bottom:.5rem;opacity:.4;}
+.upz p{font-family:var(--ff-l);font-size:15px;color:var(--muted);font-style:italic;}
+.upz small{font-family:var(--ff-d);font-size:9px;letter-spacing:.2em;color:var(--teal);}
+.igal{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;}
+.ith{aspect-ratio:1;position:relative;overflow:hidden;background:var(--bg2);border:1.5px solid var(--border);cursor:pointer;}
+.itha{position:absolute;inset:0;background:rgba(123,28,46,.75);display:flex;align-items:center;justify-content:center;gap:.5rem;opacity:0;transition:opacity .2s;}
+.ith:hover .itha{opacity:1;}
+.gwc{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--border);padding:1.2rem 1.4rem;margin-bottom:.8rem;}
+.gwn{font-family:var(--ff-h);font-size:16px;font-weight:700;color:var(--burgundy);}
+.gwm{font-family:var(--ff-l);font-size:14px;color:var(--muted);font-style:italic;}
+.ang{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;}
+.anc{background:var(--surface);border:1.5px solid var(--border);padding:1.2rem;}
+.anc .an{font-family:var(--ff-h);font-size:28px;font-weight:900;color:var(--burgundy);line-height:1;}
+.anc .al{font-family:var(--ff-d);font-size:9px;letter-spacing:.2em;color:var(--teal);margin-top:.3rem;}
+.anc .at{font-family:var(--ff-l);font-size:13px;color:var(--muted);font-style:italic;}
+.ctbl{width:100%;border-collapse:collapse;margin-bottom:1.5rem;}
+.ctbl th{font-family:var(--ff-d);font-size:9px;letter-spacing:.2em;color:var(--teal);padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);}
+.ctbl td{font-family:var(--ff-l);font-size:14px;color:var(--ink);padding:10px 12px;border-bottom:1px solid rgba(46,125,107,.1);}
+.ctbl tr:hover td{background:rgba(46,125,107,.04);}
+.os{font-family:var(--ff-d);font-size:9px;letter-spacing:.12em;padding:3px 9px;}
+.os.pd{background:rgba(46,125,107,.15);color:var(--teal);}
+.os.pe{background:rgba(184,134,11,.15);color:var(--gold);}
+.os.sh{background:rgba(123,28,46,.15);color:var(--burgundy);}
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:99999;background:var(--teal);color:var(--bg);font-family:var(--ff-d);font-size:10px;letter-spacing:.2em;padding:14px 24px;transform:translateY(80px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
+.toast.sh{transform:translateY(0);opacity:1;}
+
+@media(max-width:1100px){nav{padding:1rem 1.5rem;}.nl{display:none;}.hcont{padding:8rem 2rem 5rem;grid-template-columns:1fr;}.hright{display:none;}.cgrid{grid-template-columns:1fr 1fr;grid-template-rows:auto;}.cc:first-child{grid-column:1/-1;}.pgrid{grid-template-columns:repeat(2,1fr);}.story{grid-template-columns:1fr;gap:3rem;}.sv{display:none;}.tgrid{grid-template-columns:1fr;}.nl2{grid-template-columns:1fr;gap:2rem;}.ft{grid-template-columns:1fr 1fr;gap:2rem;}}
+@media(max-width:600px){.htitle{font-size:44px;}.cgrid{grid-template-columns:1fr;}.pgrid{grid-template-columns:repeat(2,1fr);gap:10px;}.ft{grid-template-columns:1fr;}.nlf{flex-direction:column;}.nlin{border-right:1.5px solid var(--border);border-bottom:none;}.tgrid{grid-template-columns:1fr;}#cms-p{width:100vw;}.cgr{grid-template-columns:1fr;}.ang{grid-template-columns:1fr 1fr;}.thsw{grid-template-columns:1fr 1fr;}}
+
+/* ═══ ADMIN LOGIN MODAL ═══ */
+#adm-ov{position:fixed;inset:0;z-index:20000;display:none;align-items:center;justify-content:center;background:rgba(10,6,4,.82);backdrop-filter:blur(10px);}
+#adm-ov.op{display:flex;}
+#adm-box{position:relative;width:min(420px,92vw);background:var(--bg);border:1.5px solid var(--borderc);box-shadow:0 0 80px rgba(123,28,46,.18),0 8px 60px rgba(0,0,0,.45);overflow:hidden;animation:admIn .35s cubic-bezier(.34,1.4,.64,1) both;}
+@keyframes admIn{from{opacity:0;transform:scale(.93) translateY(16px)}to{opacity:1;transform:none}}
+#adm-box::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5L33 27L55 30L33 33L30 55L27 33L5 30L27 27Z' stroke='%237B1C2E' stroke-width='.35' fill='none' opacity='.08'/%3E%3C/svg%3E");pointer-events:none;}
+.adm-top{background:var(--burgundy);padding:2rem 2rem 1.6rem;text-align:center;position:relative;border-bottom:3px solid var(--teal);}
+.adm-top::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:60px;height:3px;background:var(--gold);}
+.adm-seal{width:52px;height:52px;margin:0 auto 1rem;border:2px solid rgba(245,237,212,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(245,237,212,.08);}
+.adm-title{font-family:var(--ff-h);font-size:22px;font-weight:900;font-style:italic;color:var(--bg);letter-spacing:.04em;}
+.adm-sub{font-family:var(--ff-d);font-size:8px;letter-spacing:.42em;color:rgba(245,237,212,.55);margin-top:.35rem;}
+.adm-body{padding:2rem 2rem 1.6rem;}
+.adm-hint{font-family:var(--ff-l);font-size:13px;font-style:italic;color:var(--muted);text-align:center;margin-bottom:1.6rem;line-height:1.5;}
+.adm-field{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem;}
+.adm-field label{font-family:var(--ff-d);font-size:9px;letter-spacing:.3em;color:var(--teal);font-weight:600;}
+.adm-field input{background:var(--surface);border:1.5px solid var(--border);padding:12px 16px;color:var(--ink);font-family:var(--ff-l);font-size:16px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+.adm-field input:focus{border-color:var(--burgundy);box-shadow:0 0 0 3px rgba(123,28,46,.08);}
+.adm-field input.err{border-color:#8B1A1A;animation:shake .35s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.adm-err{font-family:var(--ff-d);font-size:9px;letter-spacing:.2em;color:#8B1A1A;margin-top:.3rem;display:none;}
+.adm-err.vis{display:block;}
+.adm-tries{font-family:var(--ff-d);font-size:9px;letter-spacing:.15em;color:var(--muted);text-align:right;margin-bottom:1.2rem;}
+.adm-tries span{color:var(--burgundy);font-weight:700;}
+.adm-submit{width:100%;background:var(--burgundy);color:var(--bg);border:none;font-family:var(--ff-d);font-size:10px;letter-spacing:.35em;font-weight:600;padding:14px;cursor:pointer;transition:background .2s,transform .1s;margin-bottom:.8rem;}
+.adm-submit:hover{background:var(--burgundy2);}
+.adm-submit:active{transform:scale(.98);}
+.adm-submit:disabled{opacity:.5;cursor:not-allowed;}
+.adm-cancel{width:100%;background:none;border:1.5px solid var(--border);color:var(--muted);font-family:var(--ff-d);font-size:9px;letter-spacing:.25em;padding:10px;cursor:pointer;transition:all .2s;}
+.adm-cancel:hover{border-color:var(--teal);color:var(--teal);}
+.adm-locked{text-align:center;padding:1rem 0 .5rem;}
+.adm-locked p{font-family:var(--ff-l);font-size:14px;font-style:italic;color:var(--muted);line-height:1.6;}
+.adm-locked .lk-ico{font-size:32px;margin-bottom:.5rem;display:block;}
+.adm-divider{display:flex;align-items:center;gap:.8rem;margin:1.2rem 0;}
+.adm-divider::before,.adm-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.adm-divider span{font-family:var(--ff-d);font-size:8px;letter-spacing:.3em;color:var(--muted);}
+/* logged-in badge in nav */
+#adm-badge{display:none;align-items:center;gap:.5rem;background:var(--teal);color:var(--bg);border:none;font-family:var(--ff-d);font-size:9px;letter-spacing:.2em;padding:6px 14px;cursor:pointer;font-weight:600;}
+#adm-badge.vis{display:flex;}
+</style>
+</head>
+<body>
+
+<!-- ═══ INTRO STAGE ═══ -->
+<div id="stage">
+  <div id="wall"></div>
+  <div class="torch L"><div class="t-glow"></div><div class="t-flame"></div><div class="t-head"></div><div class="t-pole"></div></div>
+  <div class="torch R"><div class="t-glow"></div><div class="t-flame"></div><div class="t-head"></div><div class="t-pole"></div></div>
+  <div id="dlight"></div>
+  <div id="dp">
+    <div id="dw">
+      <!-- ARCH SVG -->
+      <svg id="arch" viewBox="0 0 560 780" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 778L18 308Q18 18 280 18Q542 18 542 308L542 778" stroke="#7A5800" stroke-width="3" fill="rgba(20,10,2,0.5)" opacity="0.9"/>
+        <path d="M36 778L36 318Q36 50 280 50Q524 50 524 318L524 778" stroke="#C9973A" stroke-width="1.5" fill="none" opacity="0.8"/>
+        <path d="M56 778L56 330Q56 84 280 84Q504 84 504 330L504 778" stroke="#C9973A" stroke-width="0.8" fill="none" opacity="0.5"/>
+        <ellipse cx="280" cy="28" rx="42" ry="24" fill="rgba(40,20,4,0.9)" stroke="#C9973A" stroke-width="1.5" opacity="0.9"/>
+        <ellipse cx="280" cy="28" rx="26" ry="14" fill="rgba(20,10,2,0.6)" stroke="#D4A820" stroke-width="1" opacity="0.8"/>
+        <circle cx="280" cy="28" r="7" fill="#C9973A" opacity="0.8"/>
+        <path d="M280 8L283.5 20M280 8L276.5 20" stroke="#C9973A" stroke-width="0.8" opacity="0.6"/>
+        <path d="M302 16L293 25M258 16L267 25M310 28L298 28M262 28L250 28" stroke="#C9973A" stroke-width="0.7" opacity="0.5"/>
+        <rect x="12" y="295" width="30" height="10" rx="1" fill="rgba(90,55,10,0.7)" stroke="#C9973A" stroke-width="0.7" opacity="0.7"/>
+        <rect x="8" y="305" width="38" height="7" fill="rgba(60,35,5,0.6)" stroke="#B8860B" stroke-width="0.5" opacity="0.6"/>
+        <rect x="518" y="295" width="30" height="10" rx="1" fill="rgba(90,55,10,0.7)" stroke="#C9973A" stroke-width="0.7" opacity="0.7"/>
+        <rect x="514" y="305" width="38" height="7" fill="rgba(60,35,5,0.6)" stroke="#B8860B" stroke-width="0.5" opacity="0.6"/>
+        <line x1="22" y1="312" x2="22" y2="778" stroke="#8B6914" stroke-width="0.8" opacity="0.35"/>
+        <line x1="30" y1="312" x2="30" y2="778" stroke="#C9973A" stroke-width="0.4" opacity="0.25"/>
+        <line x1="538" y1="312" x2="538" y2="778" stroke="#8B6914" stroke-width="0.8" opacity="0.35"/>
+        <line x1="530" y1="312" x2="530" y2="778" stroke="#C9973A" stroke-width="0.4" opacity="0.25"/>
+        <path d="M58 278Q86 238 118 212Q144 196 162 202" stroke="#C9973A" stroke-width="1" fill="none" opacity="0.5"/>
+        <path d="M76 298Q102 262 128 238Q150 220 166 224" stroke="#C9973A" stroke-width="0.6" fill="none" opacity="0.35"/>
+        <circle cx="90" cy="262" r="6" stroke="#C9973A" stroke-width="0.8" fill="rgba(200,150,40,0.08)" opacity="0.5"/>
+        <circle cx="114" cy="238" r="4.5" stroke="#C9973A" stroke-width="0.6" fill="none" opacity="0.4"/>
+        <path d="M502 278Q474 238 442 212Q416 196 398 202" stroke="#C9973A" stroke-width="1" fill="none" opacity="0.5"/>
+        <path d="M484 298Q458 262 432 238Q410 220 394 224" stroke="#C9973A" stroke-width="0.6" fill="none" opacity="0.35"/>
+        <circle cx="470" cy="262" r="6" stroke="#C9973A" stroke-width="0.8" fill="rgba(200,150,40,0.08)" opacity="0.5"/>
+        <circle cx="446" cy="238" r="4.5" stroke="#C9973A" stroke-width="0.6" fill="none" opacity="0.4"/>
+        <path d="M265 118Q272 96 280 90Q288 96 295 118Q288 112 280 110Q272 112 265 118Z" stroke="#D4A820" stroke-width="0.8" fill="none" opacity="0.5"/>
+        <path d="M255 130Q268 106 280 100Q292 106 305 130Q292 120 280 117Q268 120 255 130Z" stroke="#C9973A" stroke-width="0.6" fill="none" opacity="0.38"/>
+        <rect x="8" y="770" width="544" height="9" fill="rgba(70,40,6,0.5)" stroke="#8B6914" stroke-width="0.6" opacity="0.6"/>
+        <rect x="0" y="779" width="560" height="5" fill="rgba(50,28,4,0.5)" stroke="#7A5800" stroke-width="0.4" opacity="0.5"/>
+      </svg>
+      <div id="seam"></div>
+      <!-- LEFT DOOR -->
+      <div class="dh" id="dL">
+        <div class="df">
+          <div class="bs bt"></div><div class="bs bm"></div><div class="bs bb"></div>
+          <div class="dpan">
+            <div class="dp2">
+              <svg class="psv" viewBox="0 0 120 120" fill="none"><circle cx="60" cy="60" r="50" stroke="#B8860B" stroke-width="0.8" opacity="0.6"/><circle cx="60" cy="60" r="38" stroke="#C9973A" stroke-width="0.6" opacity="0.5"/><circle cx="60" cy="60" r="22" stroke="#B8860B" stroke-width="0.5" opacity="0.45"/><circle cx="60" cy="60" r="9" stroke="#D4A820" stroke-width="0.7" opacity="0.55"/><path d="M60 10L64.5 55.5L110 60L64.5 64.5L60 110L55.5 64.5L10 60L55.5 55.5Z" stroke="#D4A820" stroke-width="0.9" opacity="0.65"/><path d="M60 28L63 57L92 60L63 63L60 92L57 63L28 60L57 57Z" stroke="#C9973A" stroke-width="0.6" opacity="0.5"/><ellipse cx="60" cy="34" rx="7" ry="16" stroke="#C9973A" stroke-width="0.6" opacity="0.4"/><ellipse cx="86" cy="60" rx="16" ry="7" stroke="#C9973A" stroke-width="0.6" opacity="0.4"/><ellipse cx="60" cy="86" rx="7" ry="16" stroke="#C9973A" stroke-width="0.6" opacity="0.4"/><ellipse cx="34" cy="60" rx="16" ry="7" stroke="#C9973A" stroke-width="0.6" opacity="0.4"/><circle cx="60" cy="60" r="3.5" fill="#D4A820" opacity="0.6"/></svg>
+            </div>
+            <div class="dp2">
+              <svg class="psv" viewBox="0 0 120 160" fill="none"><path d="M60 22Q88 32 93 62Q98 90 78 115Q63 132 48 126Q28 118 26 94Q22 66 40 43Q48 30 60 22Z" stroke="#C9973A" stroke-width="1" opacity="0.6"/><path d="M60 38Q80 46 84 68Q88 90 72 108Q60 120 48 116Q35 110 33 90Q30 68 46 52Z" stroke="#B8860B" stroke-width="0.7" opacity="0.45"/><circle cx="60" cy="82" r="14" stroke="#D4A820" stroke-width="0.8" opacity="0.5"/><circle cx="60" cy="82" r="7" stroke="#C9973A" stroke-width="0.6" opacity="0.5"/><circle cx="60" cy="82" r="2.5" fill="#D4A820" opacity="0.5"/><circle cx="28" cy="32" r="3.5" stroke="#B8860B" stroke-width="0.5" opacity="0.35"/><circle cx="92" cy="32" r="3.5" stroke="#B8860B" stroke-width="0.5" opacity="0.35"/><circle cx="28" cy="132" r="3.5" stroke="#B8860B" stroke-width="0.5" opacity="0.35"/><circle cx="92" cy="132" r="3.5" stroke="#B8860B" stroke-width="0.5" opacity="0.35"/></svg>
+            </div>
+          </div>
+          <div id="kh"><div class="khe"><div class="khs"></div></div></div>
+        </div>
+        <div class="ddep"></div>
+      </div>
+      <!-- RIGHT DOOR -->
+      <div class="dh" id="dR">
+        <div class="df">
+          <div class="bs bt"></div><div class="bs bm"></div><div class="bs bb"></div>
+          <div class="dpan">
+            <div class="dp2">
+              <svg class="psv" viewBox="0 0 120 120" fill="none"><circle cx="60" cy="60" r="50" stroke="#B8860B" stroke-width="0.8" opacity="0.6"/><circle cx="60" cy="60" r="38" stroke="#C9973A" stroke-width="0.6" opacity="0.5"/><circle cx="60" cy="60" r="22" stroke="#B8860B" stroke-width="0.5" opacity="0.45"/><path d="M60 10L64.5 55.5L110 60L64.5 64.5L60 110L55.5 64.5L10 60L55.5 55.5Z" stroke="#D4A820" stroke-width="0.9" opacity="0.65"/><ellipse cx="60" cy="34" rx="7" ry="16" stroke="#C9973A" stroke-width="0.6" opacity="0.4"/><ellipse cx="86" cy="60" rx="16" ry="7" stroke="#C9973A" stroke-width="0.6" opacity="0.4"/><ellipse cx="60" cy="86" rx="7" ry="16" stroke="#C9973A" stroke-width="0.6" opacity="0.4"/><ellipse cx="34" cy="60" rx="16" ry="7" stroke="#C9973A" stroke-width="0.6" opacity="0.4"/><circle cx="60" cy="60" r="3.5" fill="#D4A820" opacity="0.6"/></svg>
+            </div>
+            <div class="dp2">
+              <svg class="psv" viewBox="0 0 120 160" fill="none"><path d="M60 22Q88 32 93 62Q98 90 78 115Q63 132 48 126Q28 118 26 94Q22 66 40 43Q48 30 60 22Z" stroke="#C9973A" stroke-width="1" opacity="0.6"/><circle cx="60" cy="82" r="14" stroke="#D4A820" stroke-width="0.8" opacity="0.5"/><circle cx="60" cy="82" r="7" stroke="#C9973A" stroke-width="0.6" opacity="0.5"/><circle cx="60" cy="82" r="2.5" fill="#D4A820" opacity="0.5"/><circle cx="28" cy="32" r="3.5" stroke="#B8860B" stroke-width="0.5" opacity="0.35"/><circle cx="92" cy="32" r="3.5" stroke="#B8860B" stroke-width="0.5" opacity="0.35"/><circle cx="28" cy="132" r="3.5" stroke="#B8860B" stroke-width="0.5" opacity="0.35"/><circle cx="92" cy="132" r="3.5" stroke="#B8860B" stroke-width="0.5" opacity="0.35"/></svg>
+            </div>
+          </div>
+          <div id="knocker"><div class="kbp"><div class="kf"></div></div><div class="kr"></div></div>
+        </div>
+        <div class="ddep"></div>
+      </div>
+    </div>
+  </div>
+  <div id="enter">✦ TAP TO ENTER ✦</div>
+
+  <!-- JAIPUR REVEAL -->
+  <div id="jr">
+    <div class="jsky"></div>
+    <div class="jsun"></div>
+    <div class="jsil lhills"></div>
+    <!-- Amber Fort far layer -->
+    <div class="jsil" style="height:40%;bottom:28%;opacity:.7">
+      <svg viewBox="0 0 1400 300" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%" preserveAspectRatio="xMidYMax meet">
+        <path d="M0 300L0 200L80 200L80 180L100 180L100 165L115 165L115 180L130 180L130 150L150 150L150 135L170 135L170 120L190 120L190 100L210 100L210 120L230 120L230 130L250 130L250 115L270 115L270 100L290 100L290 90L310 90L310 75L330 75L330 90L350 90L350 100L380 100L380 115L400 115L400 100L420 100L420 88L440 88L440 78L460 78L460 68L480 68L480 78L500 78L500 90L530 90L530 100L560 100L560 110L590 110L590 95L620 95L620 80L650 80L650 70L680 70L680 80L710 80L710 95L740 95L740 108L770 108L770 120L800 120L800 110L830 110L830 100L860 100L860 90L890 90L890 100L920 100L920 115L950 115L950 130L980 130L980 145L1010 145L1010 160L1050 160L1050 180L1090 180L1090 200L1130 200L1130 220L1400 220L1400 300Z" fill="#A0614A" opacity="0.55"/>
+        <rect x="468" y="52" width="24" height="30" fill="#A0614A" opacity="0.65"/><path d="M465 52L480 42L495 52Z" fill="#A0614A" opacity="0.6"/>
+        <rect x="638" y="58" width="24" height="24" fill="#A0614A" opacity="0.6"/><path d="M635 58L650 48L665 58Z" fill="#A0614A" opacity="0.55"/>
+        <rect x="298" y="72" width="22" height="22" fill="#A0614A" opacity="0.55"/><path d="M295 72L309 62L323 72Z" fill="#A0614A" opacity="0.5"/>
+      </svg>
+    </div>
+    <!-- City Palace mid layer -->
+    <div class="jsil" style="height:52%;bottom:14%;opacity:.85">
+      <svg viewBox="0 0 1400 380" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%" preserveAspectRatio="xMidYMax meet">
+        <path d="M0 380L0 280L60 280L60 260L80 260L80 240L100 240L100 220L120 220L120 200L140 200L140 185L155 185L155 168L170 168L170 155L185 155L185 140L200 140L200 125L215 125L215 110L230 110L230 125L248 125L248 138L265 138L265 152L280 152L280 140L298 140L298 125L315 125L315 108L330 108L330 90L345 90L345 72L358 72L358 60L370 60L370 48L382 48L382 38L394 38L394 28L406 28L406 38L418 38L418 48L430 48L430 60L442 60L442 72L455 72L455 90L470 90L470 108L485 108L485 122L500 122L500 138L515 138L515 152L530 152L530 138L548 138L548 125L565 125L565 112L582 112L582 125L600 125L600 140L620 140L620 155L640 155L640 170L660 170L660 185L680 185L680 200L700 200L700 218L720 218L720 235L745 235L745 252L770 252L770 240L795 240L795 228L820 228L820 215L845 215L845 202L870 202L870 215L895 215L895 228L920 228L920 215L945 215L945 202L965 202L965 188L985 188L985 175L1005 175L1005 162L1025 162L1025 148L1050 148L1050 162L1075 162L1075 178L1100 178L1100 195L1125 195L1125 212L1155 212L1155 228L1190 228L1190 248L1400 260L1400 380Z" fill="#B8723A" opacity="0.7"/>
+        <rect x="392" y="12" width="28" height="28" fill="#B8723A" opacity="0.8"/><path d="M388 12L406 0L424 12Z" fill="#C8824A" opacity="0.75"/><circle cx="406" cy="0" r="4" fill="#D4A820" opacity="0.7"/>
+        <rect x="343" y="55" width="18" height="22" fill="#B8723A" opacity="0.7"/><path d="M340 55L352 45L364 55Z" fill="#C8824A" opacity="0.65"/>
+        <rect x="452" y="55" width="18" height="22" fill="#B8723A" opacity="0.7"/><path d="M449 55L461 45L473 55Z" fill="#C8824A" opacity="0.65"/>
+      </svg>
+    </div>
+    <!-- Hawa Mahal foreground -->
+    <div class="jsil" style="height:50%;bottom:0;opacity:1">
+      <svg viewBox="0 0 1400 420" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%" preserveAspectRatio="xMidYMax meet">
+        <path d="M0 420L0 320L40 320L40 300L60 300L60 280L80 280L80 265L100 265L100 280L120 280L120 300L140 300L140 280L160 280L160 260L180 260L180 245L200 245L200 260L220 260L220 280L240 280L240 300L260 300L260 320L280 320L280 340L300 340L300 320L320 320L320 295L340 295L340 270L355 270L355 250L365 250L365 230L375 230L375 210L385 210L385 195L395 195L395 210L405 210L405 230L415 230L415 250L425 250L425 270L440 270L440 295L455 295L455 320L475 320L475 300L495 300L495 280L515 280L515 260L535 260L535 245L555 245L555 235L575 235L575 225L595 225L595 215L615 215L615 225L635 225L635 245L655 245L655 265L675 265L675 285L695 285L695 305L720 305L720 285L745 285L745 265L770 265L770 245L795 245L795 228L820 228L820 215L845 215L845 202L870 202L870 215L895 215L895 228L920 228L920 245L945 245L945 265L970 265L970 285L995 285L995 305L1020 305L1020 285L1045 285L1045 265L1070 265L1070 280L1095 280L1095 295L1120 295L1120 310L1145 310L1145 325L1400 332L1400 420Z" fill="#C47840" opacity="0.92"/>
+        <!-- Hawa Mahal iconic -->
+        <g transform="translate(340,0)">
+          <rect x="0" y="220" width="130" height="200" fill="#D4824A" opacity="0.88"/>
+          <rect x="8" y="224" width="18" height="26" rx="9" fill="#902A18" opacity="0.75"/>
+          <rect x="30" y="224" width="18" height="26" rx="9" fill="#902A18" opacity="0.75"/>
+          <rect x="52" y="224" width="18" height="26" rx="9" fill="#902A18" opacity="0.75"/>
+          <rect x="74" y="224" width="18" height="26" rx="9" fill="#902A18" opacity="0.75"/>
+          <rect x="96" y="224" width="18" height="26" rx="9" fill="#902A18" opacity="0.75"/>
+          <rect x="108" y="224" width="18" height="26" rx="9" fill="#902A18" opacity="0.75"/>
+          <rect x="8" y="256" width="18" height="24" rx="9" fill="#902A18" opacity="0.7"/>
+          <rect x="30" y="256" width="18" height="24" rx="9" fill="#902A18" opacity="0.7"/>
+          <rect x="52" y="256" width="18" height="24" rx="9" fill="#902A18" opacity="0.7"/>
+          <rect x="74" y="256" width="18" height="24" rx="9" fill="#902A18" opacity="0.7"/>
+          <rect x="96" y="256" width="18" height="24" rx="9" fill="#902A18" opacity="0.7"/>
+          <rect x="8" y="286" width="18" height="22" rx="9" fill="#7A2010" opacity="0.65"/>
+          <rect x="30" y="286" width="18" height="22" rx="9" fill="#7A2010" opacity="0.65"/>
+          <rect x="52" y="286" width="18" height="22" rx="9" fill="#7A2010" opacity="0.65"/>
+          <rect x="74" y="286" width="18" height="22" rx="9" fill="#7A2010" opacity="0.65"/>
+          <rect x="96" y="286" width="18" height="22" rx="9" fill="#7A2010" opacity="0.65"/>
+          <path d="M-5 220Q0 200 8 200Q20 195 30 200Q35 200 40 220Z" fill="#D4824A" opacity="0.88"/>
+          <path d="M25 220Q30 198 40 198Q52 193 60 198Q65 198 70 220Z" fill="#D4824A" opacity="0.88"/>
+          <path d="M55 220Q60 196 70 196Q82 191 90 196Q95 196 100 220Z" fill="#D4824A" opacity="0.88"/>
+          <path d="M85 220Q90 198 100 198Q112 193 120 198Q125 198 130 220Z" fill="#D4824A" opacity="0.88"/>
+          <ellipse cx="17" cy="200" rx="9" ry="6" fill="#E8924A" opacity="0.82"/>
+          <ellipse cx="47" cy="196" rx="10" ry="7" fill="#E8924A" opacity="0.82"/>
+          <ellipse cx="77" cy="194" rx="11" ry="7" fill="#E8924A" opacity="0.82"/>
+          <ellipse cx="107" cy="196" rx="10" ry="7" fill="#E8924A" opacity="0.82"/>
+          <line x1="17" y1="194" x2="17" y2="178" stroke="#C9973A" stroke-width="1.2"/>
+          <line x1="47" y1="189" x2="47" y2="170" stroke="#C9973A" stroke-width="1.2"/>
+          <line x1="77" y1="187" x2="77" y2="168" stroke="#C9973A" stroke-width="1.2"/>
+          <line x1="107" y1="189" x2="107" y2="170" stroke="#C9973A" stroke-width="1.2"/>
+          <path d="M17 178L28 182L17 186Z" fill="#D4A820" opacity="0.7"/>
+          <path d="M47 170L58 174L47 178Z" fill="#D4A820" opacity="0.7"/>
+          <path d="M77 168L88 172L77 176Z" fill="#D4A820" opacity="0.7"/>
+          <path d="M107 170L118 174L107 178Z" fill="#D4A820" opacity="0.7"/>
+        </g>
+        <path d="M0 395Q350 382 700 388Q1050 394 1400 386L1400 420L0 420Z" fill="#D4A96A" opacity="0.65"/>
+      </svg>
+    </div>
+    <div class="jsil lground"></div>
+    <div class="jcap"><h2>QISMET</h2><p>✦ JAIPUR, RAJASTHAN ✦</p></div>
+    <div id="curtain"></div>
+  </div>
+</div>
+
+<!-- ═══ MAIN SITE ═══ -->
+<div class="strip"><div class="si"><span>COMPLIMENTARY SHIPPING ABOVE ₹2999</span><span>HANDCRAFTED IN JAIPUR</span><span>MASTER KARIGARS SINCE 1987</span><span>QISMET — FATED TO BE WORN</span><span>EMBROIDERY BY HAND — NO TWO PIECES ALIKE</span><span>COMPLIMENTARY SHIPPING ABOVE ₹2999</span><span>HANDCRAFTED IN JAIPUR</span><span>MASTER KARIGARS SINCE 1987</span><span>QISMET — FATED TO BE WORN</span><span>EMBROIDERY BY HAND — NO TWO PIECES ALIKE</span></div></div>
+
+<nav id="mn" style="top:36px">
+  <a href="#" class="nlogo">QISMET<span class="ns">— FATED TO BE WORN</span></a>
+  <ul class="nl"><li><a href="#cols">COLLECTIONS</a></li><li><a href="#">BESPOKE</a></li><li><a href="#">LOOKBOOK</a></li><li><a href="#">OUR CRAFT</a></li><li><a href="#">CONTACT</a></li></ul>
+  <div class="na"><button>SEARCH</button><button id="adm-badge" onclick="openCMS()" title="Admin Panel">⚙ MANAGE</button><button class="cbtn" id="cartb">BAG (0)</button></div>
+</nav>
+
+<section class="hero">
+  <div class="h-jali"></div><div class="h-al"></div><div class="h-ar"></div>
+  <div class="hero-q">Q</div>
+  <div class="hcont">
+    <div>
+      <div class="hey">HERITAGE MENSWEAR</div>
+      <h1 class="htitle">SOME<br>THINGS<br>ARE<br><span class="ghost">Qismet</span></h1>
+      <div class="hctas"><a href="#cols" class="bp">EXPLORE COLLECTIONS</a><a href="#" class="bg2">OUR CRAFT</a></div>
+    </div>
+    <div class="hright">
+      <div class="hst"><div class="num">37+</div><div class="lbl">Years of Heritage</div></div>
+      <div class="hst"><div class="num">850+</div><div class="lbl">Bespoke Silhouettes</div></div>
+      <p class="htag">Where the spirit of Udaipur's lake palaces meets the modern maharaja.</p>
+    </div>
+  </div>
+</section>
+
+<div class="cmw"><div class="cmar"><a href="#" class="ci">SHERWANI</a><a href="#" class="ci">KURTA SETS</a><a href="#" class="ci">BANDHGALA</a><a href="#" class="ci">NEHRU JACKET</a><a href="#" class="ci">DHOTI KURTA</a><a href="#" class="ci">INDO-WESTERN</a><a href="#" class="ci">JODHPURI SUIT</a><a href="#" class="ci">ANGRAKHA</a><a href="#" class="ci">SHERWANI</a><a href="#" class="ci">KURTA SETS</a><a href="#" class="ci">BANDHGALA</a><a href="#" class="ci">NEHRU JACKET</a><a href="#" class="ci">DHOTI KURTA</a><a href="#" class="ci">INDO-WESTERN</a><a href="#" class="ci">JODHPURI SUIT</a><a href="#" class="ci">ANGRAKHA</a></div></div>
+
+<section class="collections" id="cols">
+  <div style="margin-bottom:3.5rem"><div class="sec-e">THE EDIT</div><h2 class="sec-t">Collections</h2><p class="sec-s">Rooted in Rajasthan. Worn across the world.</p></div>
+  <div class="cgrid">
+    <div class="cc"><div class="cbg c1"><div class="cpat"></div></div><div class="cov"></div><div class="ci2"><span class="tag">SIGNATURE COLLECTION</span><h3>The Maharaja Sherwani</h3><a href="#" class="clnk">VIEW ALL</a></div></div>
+    <div class="cc"><div class="cbg c2"><div class="cpat"></div></div><div class="cov"></div><div class="ci2"><span class="tag">EVERYDAY ROYALTY</span><h3>Kurta Sets</h3><a href="#" class="clnk">EXPLORE</a></div></div>
+    <div class="cc"><div class="cbg c3"><div class="cpat"></div></div><div class="cov"></div><div class="ci2"><span class="tag">FORMAL WEAR</span><h3>Bandhgala Jackets</h3><a href="#" class="clnk">EXPLORE</a></div></div>
+    <div class="cc"><div class="cbg c4"><div class="cpat"></div></div><div class="cov"></div><div class="ci2"><span class="tag">CEREMONIAL</span><h3>Dhoti Kurta</h3><a href="#" class="clnk">EXPLORE</a></div></div>
+    <div class="cc"><div class="cbg c5"><div class="cpat"></div></div><div class="cov"></div><div class="ci2"><span class="tag">NEW SEASON</span><h3>Indo-Western</h3><a href="#" class="clnk">EXPLORE</a></div></div>
+  </div>
+</section>
+
+<div class="od"><div class="ln"></div><div class="sy">✦ ◆ ✦</div><div class="ln"></div></div>
+
+<section class="drops">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3rem"><div><div class="sec-e" style="text-align:left">JUST ARRIVED</div><h2 class="sec-t" style="text-align:left">Fresh Drops</h2></div><a href="#" class="bg2">VIEW ALL →</a></div>
+  <div class="pgrid">
+    <div class="pc"><div class="pi s1"><div class="pb">NEW</div><button class="pq">+ QUICK ADD</button></div><div class="pn">Crimson Zardozi Sherwani</div><div class="pp">₹ 18,499</div></div>
+    <div class="pc"><div class="pi s2"><button class="pq">+ QUICK ADD</button></div><div class="pn">Indigo Block-Print Kurta Set</div><div class="pp"><span class="or">₹ 6,999</span>₹ 5,499</div></div>
+    <div class="pc"><div class="pi s3"><div class="pb">BESTSELLER</div><button class="pq">+ QUICK ADD</button></div><div class="pn">Forest Bandhgala Jacket</div><div class="pp">₹ 9,899</div></div>
+    <div class="pc"><div class="pi s4"><button class="pq">+ QUICK ADD</button></div><div class="pn">Amber Brocade Nehru Jacket</div><div class="pp">₹ 7,299</div></div>
+    <div class="pc"><div class="pi s5"><div class="pb">NEW</div><button class="pq">+ QUICK ADD</button></div><div class="pn">Plum Velvet Angrakha</div><div class="pp">₹ 12,499</div></div>
+    <div class="pc"><div class="pi s6"><div class="pb so">SOLD OUT</div><button class="pq" style="background:rgba(46,125,107,.2);color:#2E7D6B">NOTIFY ME</button></div><div class="pn">Saffron Jodhpuri Suit</div><div class="pp">₹ 22,999</div></div>
+    <div class="pc"><div class="pi s7"><button class="pq">+ QUICK ADD</button></div><div class="pn">Teal Chikankari Kurta</div><div class="pp">₹ 4,699</div></div>
+    <div class="pc"><div class="pi s8"><div class="pb">BESTSELLER</div><button class="pq">+ QUICK ADD</button></div><div class="pn">Maroon Silk Dhoti Set</div><div class="pp">₹ 11,299</div></div>
+  </div>
+</section>
+
+<section class="story">
+  <div class="sv"><div class="svb"></div><div class="svp"></div><div class="svf"></div><div class="svn"><div class="yr">1987</div><div class="yl">EST.</div></div></div>
+  <div class="st">
+    <div class="pre">OUR HERITAGE</div>
+    <h2>Born in<br><em>Jaipur's Pink City</em><br>Written in the Stars</h2>
+    <p>Some things are not chosen — they are <span style="color:var(--burgundy);font-style:italic">qismet</span>. Born from the looms of Sanganer and the ateliers of the old walled city, Qismet was founded on a conviction that the art of Indian men's dressing deserved a custodian who would never compromise.</p>
+    <p>Every stitch carries the memory of Rajput courts, lake palaces at dusk, and the unapologetic maximalism that has defined Rajasthani identity for centuries.</p>
+    <div class="pillars">
+      <div class="pil"><div class="pt">KAARIGARI</div><p>Hand-embroidered by master artisans trained across generations</p></div>
+      <div class="pil"><div class="pt">FABRICS</div><p>Silk, velvet, chanderi & Maheshwari sourced from weavers directly</p></div>
+      <div class="pil"><div class="pt">BESPOKE</div><p>Every piece made-to-measure with a 6-week atelier process</p></div>
+      <div class="pil"><div class="pt">LEGACY</div><p>Trusted by families across 3 generations of celebrations</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="lb">
+  <div class="lbh"><div><div class="sec-e" style="text-align:left">SS '26</div><h2>The Udaipur Lookbook</h2></div><a href="#" class="bg2">FULL LOOKBOOK →</a></div>
+  <div class="lbr">
+    <div class="lk"><div class="lki lb1"><div class="lov"></div><span class="lnum">LOOK 01</span><div class="lcap"><div class="ln2">The Durbar</div><div class="lp">Sherwani + Churidar</div></div></div></div>
+    <div class="lk"><div class="lki lb2"><div class="lov"></div><span class="lnum">LOOK 02</span><div class="lcap"><div class="ln2">The Courtier</div><div class="lp">Bandhgala + Trousers</div></div></div></div>
+    <div class="lk"><div class="lki lb3"><div class="lov"></div><span class="lnum">LOOK 03</span><div class="lcap"><div class="ln2">The Garden</div><div class="lp">Angrakha + Dhoti</div></div></div></div>
+    <div class="lk"><div class="lki lb4"><div class="lov"></div><span class="lnum">LOOK 04</span><div class="lcap"><div class="ln2">The Mahal</div><div class="lp">Jodhpuri Suit</div></div></div></div>
+    <div class="lk"><div class="lki lb1" style="filter:hue-rotate(80deg)"><div class="lov"></div><span class="lnum">LOOK 05</span><div class="lcap"><div class="ln2">The Pichola</div><div class="lp">Kurta + Palazzo</div></div></div></div>
+  </div>
+</section>
+
+<section class="testi">
+  <div class="sec-e">WORN WITH PRIDE</div><h2 class="sec-t">Words from Our Patrons</h2><p class="sec-s">Trusted by grooms, artists, and men who know their cloth</p>
+  <div class="tgrid">
+    <div class="tc"><div class="stars">★★★★★</div><p class="tt">"The sherwani I commissioned for my son's wedding was beyond anything I imagined. The zardozi work was so fine it looked like it belonged in a museum."</p><div class="ta">ARVIND SINGH RATHORE</div><div class="tl">Jodhpur, Rajasthan</div></div>
+    <div class="tc"><div class="stars">★★★★★</div><p class="tt">"I've worn Indian wear from designers across the country. Qismet is in a different league — the fabrics feel alive, the fit is architectural."</p><div class="ta">KABIR MALHOTRA</div><div class="tl">Mumbai, Maharashtra</div></div>
+    <div class="tc"><div class="stars">★★★★★</div><p class="tt">"Wore their indigo bandhgala to our brand gala. Three people asked for the designer's name before I even reached the bar. Bought two more that evening."</p><div class="ta">PRITHVIRAJ NAIR</div><div class="tl">Bengaluru, Karnataka</div></div>
+  </div>
+</section>
+
+<div class="promise"><div class="pi2"><h2>EVERY PIECE. EVERY STITCH. EVERY TIME.</h2><p>Crafted by hand in the old city. It was always your qismet.</p><a href="#" class="bp" style="background:var(--bg);color:var(--burgundy);border-color:var(--bg)">COMMISSION YOUR PIECE</a></div></div>
+
+<section class="nl2">
+  <div><div class="sec-e" style="text-align:left">JOIN THE COURT</div><h2>First to Know.<br>First to Wear.</h2><p>Invitations to new collections, festive edits & atelier appointments.</p></div>
+  <div><div class="nlf"><input type="email" class="nlin" placeholder="Your email, Maharaj"><button class="nlb">SUBSCRIBE</button></div><p style="font-family:var(--ff-l);font-size:13px;color:var(--muted);margin-top:.75rem;font-style:italic">No spam. Only silk, stories & new drops.</p></div>
+</section>
+
+<footer>
+  <div class="ft">
+    <div><div class="flogo">QISMET</div><div class="fsub">Fated to be worn — since 1987</div><p class="fp">The house of Indian men's wear rooted in the Pink City, crafted for men who carry history on their shoulders and celebration in their step.</p><div class="sr"><a href="#" class="sb">IG</a><a href="#" class="sb">FB</a><a href="#" class="sb">YT</a><a href="#" class="sb">PI</a></div></div>
+    <div class="fc"><h4>COLLECTIONS</h4><ul><li><a href="#">Sherwani</a></li><li><a href="#">Kurta Sets</a></li><li><a href="#">Bandhgala</a></li><li><a href="#">Nehru Jackets</a></li><li><a href="#">Dhoti Kurta</a></li><li><a href="#">Indo-Western</a></li></ul></div>
+    <div class="fc"><h4>ATELIER</h4><ul><li><a href="#">Our Craft</a></li><li><a href="#">Bespoke</a></li><li><a href="#">Lookbook</a></li><li><a href="#">Karigars</a></li><li><a href="#">Fabrics</a></li></ul></div>
+    <div class="fc"><h4>SUPPORT</h4><ul><li><a href="#">Size Guide</a></li><li><a href="#">Shipping</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact</a></li><li><a href="#">WhatsApp</a></li></ul></div>
+  </div>
+  <div class="fb"><p>© 2026 QISMET. ALL RIGHTS RESERVED.</p><p style="font-family:var(--ff-l);font-style:italic;font-size:13px;color:rgba(245,237,212,.3)">Walled City Atelier, Jaipur 302001</p></div>
+</footer>
+
+<!-- CMS PANEL -->
+<div id="cms-ov" onclick="if(event.target===this)closeCMS()">
+  <div id="cms-p">
+    <div class="ch"><div><div class="ct">QISMET Admin</div><div class="cs">STORE MANAGEMENT PANEL</div></div><button class="cx" onclick="closeCMS()">✕</button></div>
+    <div class="ctabs">
+      <button class="ctab ac" onclick="cTab('products',this)">📦 PRODUCTS</button>
+      <button class="ctab" onclick="cTab('coupons',this)">🏷 COUPONS</button>
+      <button class="ctab" onclick="cTab('media',this)">🖼 MEDIA</button>
+      <button class="ctab" onclick="cTab('theme',this)">🎨 THEME</button>
+      <button class="ctab" onclick="cTab('payments',this)">💳 PAYMENTS</button>
+      <button class="ctab" onclick="cTab('orders',this)">📋 ORDERS</button>
+      <button class="ctab" onclick="cTab('settings',this)">⚙ SETTINGS</button>
+    </div>
+    <div class="cbody">
+
+      <div class="cpane ac" id="pane-products">
+        <p class="csh">Add New Product</p>
+        <div class="cgr">
+          <div class="cf"><label>PRODUCT NAME</label><input type="text" id="np-name" placeholder="e.g. Crimson Zardozi Sherwani"></div>
+          <div class="cf"><label>SKU</label><input type="text" id="np-sku" placeholder="QSM-001"></div>
+          <div class="cf"><label>PRICE (₹)</label><input type="number" id="np-price" placeholder="18499"></div>
+          <div class="cf"><label>COMPARE AT PRICE (₹)</label><input type="number" id="np-compare" placeholder="22000"></div>
+          <div class="cf"><label>CATEGORY</label><select id="np-cat"><option>Sherwani</option><option>Kurta Set</option><option>Bandhgala</option><option>Nehru Jacket</option><option>Dhoti Kurta</option><option>Indo-Western</option><option>Jodhpuri Suit</option><option>Angrakha</option></select></div>
+          <div class="cf"><label>STATUS</label><select id="np-status"><option>Active</option><option>Draft</option><option>Sold Out</option></select></div>
+          <div class="cf"><label>FABRIC</label><input type="text" id="np-fabric" placeholder="Silk, Velvet, Chanderi…"></div>
+          <div class="cf"><label>COLOUR</label><input type="text" id="np-colour" placeholder="Crimson, Indigo, Forest…"></div>
+        </div>
+        <div class="cf" style="margin-bottom:1.2rem"><label>DESCRIPTION</label><textarea id="np-desc" placeholder="Describe the piece — craft, embroidery, occasion…"></textarea></div>
+        <div class="cf" style="margin-bottom:1.2rem"><label>BADGE LABEL</label><select id="np-badge"><option value="">None</option><option>NEW</option><option>BESTSELLER</option><option>LIMITED</option><option>SOLD OUT</option></select></div>
+
+        <div class="cgr">
+          <div class="cf">
+            <label>PRODUCT MEDIA</label>
+            <input type="file" id="np-media" accept="image/*" multiple onchange="handleMediaPreview(this)" style="padding:10px;">
+            <div id="np-media-preview" class="np-media-grid"></div>
+          </div>
+          <div class="cf">
+            <label>SIZE CHART (Image or PDF)</label>
+            <input type="file" id="np-sizechart" accept="image/*,.pdf" onchange="handleSizeChartPreview(this)" style="padding:10px;">
+            <div id="np-sizechart-preview" class="np-media-grid"></div>
+          </div>
+        </div>
+
+        <div class="cf" style="margin-bottom:1.5rem">
+          <label>AVAILABLE SIZES</label>
+          <div class="np-size-row">
+            <label class="np-chip"><input type="checkbox" value="S"> S</label>
+            <label class="np-chip"><input type="checkbox" value="M"> M</label>
+            <label class="np-chip"><input type="checkbox" value="L"> L</label>
+            <label class="np-chip"><input type="checkbox" value="XL"> XL</label>
+            <label class="np-chip"><input type="checkbox" value="XXL"> XXL</label>
+            <label class="np-chip"><input type="checkbox" value="Custom"> Custom / Bespoke</label>
+          </div>
+        </div>
+
+        <div class="crow"><button class="cbtn2" onclick="addProduct()">+ ADD PRODUCT</button><button class="cbtn2 gh" onclick="saveDraft()">SAVE DRAFT</button></div>
+        <p class="csh" style="margin-top:1rem">Current Products</p>
+        <div id="product-list">
+          <p style="font-family:var(--ff-l);font-style:italic;color:var(--muted);padding:1rem 0;">Loading products…</p>
+        </div>
+      </div>
+
+      <div class="cpane" id="pane-coupons">
+        <p class="csh">Create Coupon</p>
+        <div class="cgr">
+          <div class="cf"><label>COUPON CODE</label><input type="text" placeholder="QISMET20"></div>
+          <div class="cf"><label>TYPE</label><select><option>Percentage (%)</option><option>Fixed Amount (₹)</option><option>Free Shipping</option><option>BOGO</option></select></div>
+          <div class="cf"><label>VALUE</label><input type="number" placeholder="20"></div>
+          <div class="cf"><label>MIN ORDER (₹)</label><input type="number" placeholder="2999"></div>
+          <div class="cf"><label>VALID FROM</label><input type="date"></div>
+          <div class="cf"><label>VALID UNTIL</label><input type="date"></div>
+        </div>
+        <div class="crow"><button class="cbtn2" onclick="toast('Coupon created!')">CREATE COUPON</button></div>
+        <p class="csh" style="margin-top:1rem">Active Coupons</p>
+        <div class="cpnc"><div><div class="pcode">QISMET20</div><div class="pmeta">20% off · Min ₹2,999 · Expires 31 Dec 2026</div></div><div style="display:flex;align-items:center;gap:1rem"><span class="pb2 ac">ACTIVE</span><button class="ib dl" onclick="toast('Coupon paused')">⏸</button></div></div>
+        <div class="cpnc"><div><div class="pcode">WELCOME10</div><div class="pmeta">₹500 off · First order · No expiry</div></div><div style="display:flex;align-items:center;gap:1rem"><span class="pb2 ac">ACTIVE</span><button class="ib dl" onclick="toast('Coupon paused')">⏸</button></div></div>
+        <div class="cpnc"><div><div class="pcode">FESTIVE30</div><div class="pmeta">30% off · Expired 15 Jan 2026</div></div><div style="display:flex;align-items:center;gap:1rem"><span class="pb2 ex">EXPIRED</span><button class="ib dl" onclick="toast('Deleted')">🗑</button></div></div>
+      </div>
+
+      <div class="cpane" id="pane-media">
+        <p class="csh">Upload Images</p>
+        <div class="upz" onclick="toast('File browser (demo)')"><div class="ico">📸</div><p>Drag & drop product images, lookbook photos or banners here</p><small>JPG · PNG · WEBP · Max 10MB · Recommended 1200×1600px</small></div>
+        <p class="csh">Media Library</p>
+        <div class="igal">
+          <div class="ith"><div style="width:100%;height:100%;background:linear-gradient(135deg,#3D0A14,#8B1C2E)"></div><div class="itha"><button class="ib" onclick="toast('Copied')">📋</button><button class="ib dl">🗑</button></div></div>
+          <div class="ith"><div style="width:100%;height:100%;background:linear-gradient(135deg,#08201A,#1A5C48)"></div><div class="itha"><button class="ib">📋</button><button class="ib dl">🗑</button></div></div>
+          <div class="ith"><div style="width:100%;height:100%;background:linear-gradient(135deg,#0A1A0A,#1A5C28)"></div><div class="itha"><button class="ib">📋</button><button class="ib dl">🗑</button></div></div>
+          <div class="ith"><div style="width:100%;height:100%;background:linear-gradient(135deg,#2A1A0A,#5C3A1A)"></div><div class="itha"><button class="ib">📋</button><button class="ib dl">🗑</button></div></div>
+          <div class="ith" style="border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--muted);cursor:pointer" onclick="toast('Upload (demo)')">+</div>
+        </div>
+        <div class="crow"><button class="cbtn2 tl" onclick="toast('Media synced!')">↻ SYNC</button></div>
+      </div>
+
+      <div class="cpane" id="pane-theme">
+        <p class="csh">Colour Themes</p>
+        <div class="thsw">
+          <div class="ths swl sel" onclick="setTheme('',this)"><div class="thl">QISMET LOGO</div></div>
+          <div class="ths swd" onclick="setTheme('dk',this)"><div class="thl">ROYAL DARK</div></div>
+          <div class="ths" style="background:linear-gradient(135deg,#0A1A0D,#1A5C28)" onclick="setTheme('forest',this)"><div class="thl">PALACE GREEN</div></div>
+          <div class="ths" style="background:linear-gradient(135deg,#08080F,#2A1A5C)" onclick="setTheme('midnight',this)"><div class="thl">MIDNIGHT</div></div>
+        </div>
+        <p class="csh">Custom Colours</p>
+        <div class="clg">
+          <div class="clf"><label>BACKGROUND</label><input type="color" value="#F5EDD4" onchange="setVar('--bg',this.value)"></div>
+          <div class="clf"><label>BURGUNDY</label><input type="color" value="#7B1C2E" onchange="setVar('--burgundy',this.value)"></div>
+          <div class="clf"><label>TEAL</label><input type="color" value="#2E7D6B" onchange="setVar('--teal',this.value)"></div>
+          <div class="clf"><label>GOLD</label><input type="color" value="#B8860B" onchange="setVar('--gold',this.value)"></div>
+          <div class="clf"><label>TEXT / INK</label><input type="color" value="#2A1018" onchange="setVar('--ink',this.value)"></div>
+          <div class="clf"><label>SURFACE</label><input type="color" value="#FFFAF0" onchange="setVar('--surface',this.value)"></div>
+        </div>
+        <p class="csh">Announcement Strip</p>
+        <div class="cf" style="margin-bottom:1.5rem"><label>STRIP TEXT</label><input type="text" value="COMPLIMENTARY SHIPPING ABOVE ₹2999 | HANDCRAFTED IN JAIPUR | QISMET — FATED TO BE WORN"></div>
+        <div class="crow"><button class="cbtn2" onclick="toast('Theme saved!')">SAVE THEME</button><button class="cbtn2 gh" onclick="toast('Reverted')">RESET</button></div>
+      </div>
+
+      <div class="cpane" id="pane-payments">
+        <p class="csh">Payment Gateways</p>
+        <div class="gwc"><div><div class="gwn">Razorpay</div><div class="gwm">Cards, UPI, Netbanking — 2% fee</div></div><div style="display:flex;align-items:center;gap:1rem"><label class="tsw"><input type="checkbox" checked onchange="toast('Razorpay '+(this.checked?'ON':'OFF'))"><span class="tsl"></span></label><button class="cbtn2" style="padding:8px 16px;font-size:9px" onclick="toast('Configure Razorpay')">CONFIGURE</button></div></div>
+        <div class="gwc"><div><div class="gwn">Cashfree</div><div class="gwm">UPI, Cards, EMI — 1.75% fee</div></div><div style="display:flex;align-items:center;gap:1rem"><label class="tsw"><input type="checkbox" onchange="toast('Cashfree '+(this.checked?'ON':'OFF'))"><span class="tsl"></span></label><button class="cbtn2" style="padding:8px 16px;font-size:9px" onclick="toast('Configure Cashfree')">CONFIGURE</button></div></div>
+        <div class="gwc"><div><div class="gwn">PayU</div><div class="gwm">Cards, Netbanking, EMI — 2.1% fee</div></div><div style="display:flex;align-items:center;gap:1rem"><label class="tsw"><input type="checkbox" onchange="toast('PayU '+(this.checked?'ON':'OFF'))"><span class="tsl"></span></label><button class="cbtn2" style="padding:8px 16px;font-size:9px" onclick="toast('Configure PayU')">CONFIGURE</button></div></div>
+        <div class="gwc"><div><div class="gwn">Cash on Delivery</div><div class="gwm">Orders below ₹15,000</div></div><label class="tsw"><input type="checkbox" checked onchange="toast('COD '+(this.checked?'ON':'OFF'))"><span class="tsl"></span></label></div>
+        <p class="csh" style="margin-top:1.5rem">API Keys</p>
+        <div class="cgr">
+          <div class="cf"><label>RAZORPAY KEY ID</label><input type="text" value="rzp_live_••••••••••••"></div>
+          <div class="cf"><label>RAZORPAY SECRET</label><input type="password" value="secret_key"></div>
+        </div>
+        <div class="crow"><button class="cbtn2" onclick="toast('Keys saved!')">SAVE KEYS</button></div>
+      </div>
+
+      <div class="cpane" id="pane-orders">
+        <p class="csh">Analytics</p>
+        <div class="ang">
+          <div class="anc"><div class="an">₹4.2L</div><div class="al">THIS MONTH</div><div class="at">↑ 18% vs last</div></div>
+          <div class="anc"><div class="an">38</div><div class="al">ORDERS</div><div class="at">↑ 12 this week</div></div>
+          <div class="anc"><div class="an">₹11K</div><div class="al">AVG ORDER</div><div class="at">↑ 8% vs last</div></div>
+        </div>
+        <p class="csh">Recent Orders</p>
+        <table class="ctbl">
+          <thead><tr><th>ORDER</th><th>CUSTOMER</th><th>AMOUNT</th><th>STATUS</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>#0842</td><td>Arjun Mehta</td><td>₹18,499</td><td><span class="os pd">PAID</span></td><td><button class="ib" onclick="toast('Order opened')">👁</button></td></tr>
+            <tr><td>#0841</td><td>Rishabh Sharma</td><td>₹9,899</td><td><span class="os sh">SHIPPED</span></td><td><button class="ib">👁</button></td></tr>
+            <tr><td>#0840</td><td>Dev Kapoor</td><td>₹10,998</td><td><span class="os pd">PAID</span></td><td><button class="ib">👁</button></td></tr>
+            <tr><td>#0839</td><td>Sahil Verma</td><td>₹22,999</td><td><span class="os pe">PENDING</span></td><td><button class="ib">👁</button></td></tr>
+          </tbody>
+        </table>
+        <div class="crow"><button class="cbtn2 tl" onclick="toast('Exported to CSV!')">↓ EXPORT CSV</button></div>
+      </div>
+
+      <div class="cpane" id="pane-settings">
+        <p class="csh">Store Info</p>
+        <div class="cgr">
+          <div class="cf"><label>STORE NAME</label><input type="text" value="QISMET"></div>
+          <div class="cf"><label>TAGLINE</label><input type="text" value="Fated to be Worn"></div>
+          <div class="cf"><label>EMAIL</label><input type="email" value="hello@qismet.in"></div>
+          <div class="cf"><label>WHATSAPP</label><input type="tel" value="+91 98765 43210"></div>
+          <div class="cf"><label>INSTAGRAM</label><input type="text" value="@qismet.in"></div>
+          <div class="cf"><label>CURRENCY</label><select><option selected>INR (₹)</option><option>USD ($)</option><option>AED</option><option>GBP (£)</option></select></div>
+        </div>
+        <p class="csh">Shipping</p>
+        <div class="cgr">
+          <div class="cf"><label>FREE SHIPPING ABOVE (₹)</label><input type="number" value="2999"></div>
+          <div class="cf"><label>STANDARD FEE (₹)</label><input type="number" value="99"></div>
+          <div class="cf"><label>EXPRESS FEE (₹)</label><input type="number" value="249"></div>
+          <div class="cf"><label>DELIVERY TIME</label><input type="text" value="5–7 business days"></div>
+        </div>
+        <p class="csh">Feature Toggles</p>
+        <div>
+          <div class="trow"><div class="tl2">Door Intro Animation<small>Show royal palace door on every page load</small></div><label class="tsw"><input type="checkbox" checked onchange="toast(this.checked?'Door ON':'Door OFF')"><span class="tsl"></span></label></div>
+          <div class="trow"><div class="tl2">Wishlist<small>Let customers save products</small></div><label class="tsw"><input type="checkbox" checked onchange="toast('Wishlist toggled')"><span class="tsl"></span></label></div>
+          <div class="trow"><div class="tl2">Quick Add on Hover<small>Show quick add button on product cards</small></div><label class="tsw"><input type="checkbox" checked onchange="toast('Quick-add toggled')"><span class="tsl"></span></label></div>
+          <div class="trow"><div class="tl2">Bespoke Orders<small>Accept made-to-measure commissions</small></div><label class="tsw"><input type="checkbox" checked onchange="toast('Bespoke toggled')"><span class="tsl"></span></label></div>
+          <div class="trow"><div class="tl2">WhatsApp Chat Bubble<small>Floating WhatsApp button on all pages</small></div><label class="tsw"><input type="checkbox" onchange="toast('WhatsApp bubble '+(this.checked?'ON':'OFF'))"><span class="tsl"></span></label></div>
+          <div class="trow"><div class="tl2">Maintenance Mode<small>Show a holding page to visitors</small></div><label class="tsw"><input type="checkbox" onchange="toast('⚠ Maintenance '+(this.checked?'ON':'OFF'))"><span class="tsl"></span></label></div>
+        </div>
+        <div class="crow" style="margin-top:1.5rem"><button class="cbtn2" onclick="toast('Settings saved!')">SAVE SETTINGS</button><button class="cbtn2 dg" onclick="toast('Reset to defaults')">RESET ALL</button></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN LOGIN MODAL ═══ -->
+<div id="adm-ov" role="dialog" aria-modal="true" aria-label="Admin Login">
+  <div id="adm-box">
+    <div class="adm-top">
+      <div class="adm-seal">✦</div>
+      <div class="adm-title">Darbar Access</div>
+      <div class="adm-sub">QISMET ADMIN SANCTUM</div>
+    </div>
+    <div class="adm-body">
+      <p class="adm-hint">This area is reserved for the house of QISMET. Please present your credentials to enter.</p>
+      <div id="adm-login-form">
+        <div class="adm-field">
+          <label for="adm-user">Username</label>
+          <input type="text" id="adm-user" placeholder="Enter username" autocomplete="username" spellcheck="false">
+        </div>
+        <div class="adm-field">
+          <label for="adm-pass">Passphrase</label>
+          <input type="password" id="adm-pass" placeholder="Enter passphrase" autocomplete="current-password">
+          <span class="adm-err" id="adm-err">Incorrect credentials. Please try again.</span>
+        </div>
+        <div class="adm-tries">Attempts remaining: <span id="adm-tries-n">5</span></div>
+        <button class="adm-submit" id="adm-submit" onclick="attemptLogin()">ENTER THE SANCTUM</button>
+        <div class="adm-divider"><span>✦</span></div>
+        <button class="adm-cancel" onclick="closeAdminLogin()">RETURN TO STOREFRONT</button>
+      </div>
+      <div id="adm-lockout" class="adm-locked" style="display:none">
+        <span class="lk-ico">🔒</span>
+        <p>Access has been sealed after too many failed attempts.<br>Please wait <strong id="adm-countdown">120</strong> seconds before trying again.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="tst"></div>
+
+<script>
+/* ═══ DOOR SEQUENCE ═══ */
+const stage=document.getElementById('stage'),
+      dL=document.getElementById('dL'),dR=document.getElementById('dR'),
+      seam=document.getElementById('seam'),dl=document.getElementById('dlight'),
+      jr=document.getElementById('jr'),curtain=document.getElementById('curtain'),
+      wall=document.getElementById('wall'),dp=document.getElementById('dp');
+let opened=false;
+document.body.style.overflow='hidden';
+
+// Spawn dust
+for(let i=0;i<18;i++){
+  const d=document.createElement('div');d.className='dust';
+  const sz=Math.random()*4+1;
+  d.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;bottom:${Math.random()*22}%;animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*2}s;--dx:${(Math.random()-.5)*80}px;`;
+  jr.appendChild(d);
+}
+
+function openDoor(){
+  if(opened)return; opened=true;
+  document.getElementById('enter').style.display='none';
+  // Swing open
+  dL.style.transform='rotateY(-118deg)';
+  dR.style.transform='rotateY(118deg)';
+  seam.style.transition='opacity .3s'; seam.style.opacity='0';
+  // Light burst
+  setTimeout(()=>dl.classList.add('on'),80);
+  // Jaipur appears
+  setTimeout(()=>{ jr.classList.add('vis'); dl.classList.add('off'); },650);
+  // Fade door/wall
+  setTimeout(()=>{ wall.style.opacity='0'; dp.style.opacity='0'; dp.style.transition='opacity .8s'; document.querySelectorAll('.torch').forEach(t=>t.style.opacity='0'); },1050);
+  // Hold on Jaipur ~2s then cream curtain closes
+  setTimeout(()=>curtain.classList.add('cl'),2900);
+  // Done — show site
+  setTimeout(()=>{ stage.style.display='none'; document.body.style.overflow=''; window.scrollTo(0,0); },3800);
+}
+stage.addEventListener('click',openDoor);
+setTimeout(openDoor,3600);
+
+/* ═══ NAV ═══ */
+const mn=document.getElementById('mn');let ti=false;
+window.addEventListener('scroll',()=>{if(!ti){requestAnimationFrame(()=>{mn.style.top=scrollY>80?'0':'36px';ti=false;});ti=true;}});
+
+/* ═══ CART ═══ */
+const cb=document.getElementById('cartb');let ct=0;
+document.querySelectorAll('.pq').forEach(b=>b.addEventListener('click',e=>{
+  e.stopPropagation();if(b.textContent.includes('NOTIFY'))return;
+  ct++;cb.textContent=`BAG (${ct})`;const o=b.textContent;b.textContent='✓ ADDED';
+  setTimeout(()=>b.textContent=o,1500);
+}));
+
+/* ═══ SCROLL REVEAL ═══ */
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}}),{threshold:.08});
+document.querySelectorAll('.cc,.pc,.tc,.pil').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(22px)';el.style.transition='opacity .55s ease,transform .55s ease';obs.observe(el);});
+
+/* ═══ CMS AUTH — Server-side via Netlify Functions ═══ */
+// No credentials in this file. All auth happens on the server.
+const AUTH_ENDPOINT   = '/.netlify/functions/admin-auth';
+const VERIFY_ENDPOINT = '/.netlify/functions/verify-token';
+const TOKEN_KEY       = 'qismet_adm_token';
+
+let admLoggedIn  = false;
+let admLockTimer = null;
+
+// On page load: silently verify any stored token
+(async () => {
+  const stored = sessionStorage.getItem(TOKEN_KEY);
+  if (!stored) return;
+  try {
+    const res = await fetch(VERIFY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: stored }),
+    });
+    const data = await res.json();
+    if (data.valid) {
+      admLoggedIn = true;
+      document.getElementById('adm-badge').classList.add('vis');
+    } else {
+      sessionStorage.removeItem(TOKEN_KEY);
+    }
+  } catch { sessionStorage.removeItem(TOKEN_KEY); }
+})();
+
+// Secret entry: triple-click the logo OR Ctrl+Shift+A
+let logoClicks = 0, logoTimer;
+document.querySelector('.nlogo').addEventListener('click', e => {
+  e.preventDefault();
+  logoClicks++;
+  clearTimeout(logoTimer);
+  if (logoClicks >= 3) { logoClicks = 0; openAdminLogin(); return; }
+  logoTimer = setTimeout(() => logoClicks = 0, 600);
+});
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); openAdminLogin(); }
+});
+
+function openAdminLogin() {
+  if (admLoggedIn) { openCMS(); return; }
+  document.getElementById('adm-ov').classList.add('op');
+  renderLoginState();
+  setTimeout(() => { const u = document.getElementById('adm-user'); if (u) u.focus(); }, 50);
+}
+
+function closeAdminLogin() {
+  document.getElementById('adm-ov').classList.remove('op');
+  clearError();
+}
+
+function renderLoginState(lockData) {
+  const locked = lockData && lockData.secondsLeft > 0;
+  document.getElementById('adm-login-form').style.display = locked ? 'none' : 'block';
+  document.getElementById('adm-lockout').style.display    = locked ? 'block' : 'none';
+  if (locked) startCountdown(lockData.secondsLeft);
+}
+
+function startCountdown(seconds) {
+  clearInterval(admLockTimer);
+  let rem = seconds;
+  const el = document.getElementById('adm-countdown');
+  if (el) el.textContent = rem;
+  admLockTimer = setInterval(() => {
+    rem--;
+    if (el) el.textContent = Math.max(0, rem);
+    if (rem <= 0) {
+      clearInterval(admLockTimer);
+      renderLoginState(null);
+      document.getElementById('adm-tries-n').textContent = 5;
+    }
+  }, 1000);
+}
+
+function clearError() {
+  const e = document.getElementById('adm-err');
+  const u = document.getElementById('adm-user');
+  const p = document.getElementById('adm-pass');
+  if (e) e.classList.remove('vis');
+  if (u) u.classList.remove('err');
+  if (p) { p.classList.remove('err'); p.value = ''; }
+}
+
+async function attemptLogin() {
+  const user = (document.getElementById('adm-user').value || '').trim();
+  const pass = (document.getElementById('adm-pass').value || '');
+  const sub  = document.getElementById('adm-submit');
+
+  if (!user || !pass) {
+    showLoginError('Please enter both username and passphrase.');
+    return;
+  }
+
+  sub.disabled = true;
+  sub.textContent = 'VERIFYING…';
+
+  try {
+    const res = await fetch(AUTH_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 200 && data.success) {
+      // Store the server-issued token
+      sessionStorage.setItem(TOKEN_KEY, data.token);
+      admLoggedIn = true;
+      closeAdminLogin();
+      document.getElementById('adm-badge').classList.add('vis');
+      toast('✦ Welcome back. The sanctum is open.');
+      openCMS();
+
+    } else if (res.status === 429 || data.locked) {
+      renderLoginState({ secondsLeft: data.secondsLeft || 120 });
+
+    } else {
+      const left = data.attemptsLeft ?? '?';
+      document.getElementById('adm-tries-n').textContent = left;
+      showLoginError(`Incorrect credentials. ${left} attempt${left===1?'':'s'} remaining.`);
+    }
+
+  } catch (err) {
+    showLoginError('Connection error. Please try again.');
+    console.error('Auth error:', err);
+  } finally {
+    sub.disabled = false;
+    sub.textContent = 'ENTER THE SANCTUM';
+  }
+}
+
+function showLoginError(msg) {
+  const e = document.getElementById('adm-err');
+  const p = document.getElementById('adm-pass');
+  e.textContent = msg;
+  e.classList.add('vis');
+  p.classList.add('err');
+  p.value = '';
+  p.focus();
+}
+
+// Enter key submits, Escape closes
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('adm-ov').classList.contains('op')) return;
+  if (e.key === 'Enter') attemptLogin();
+  if (e.key === 'Escape') closeAdminLogin();
+});
+
+// Click outside closes
+document.getElementById('adm-ov').addEventListener('click', e => {
+  if (e.target === document.getElementById('adm-ov')) closeAdminLogin();
+});
+
+function openCMS() {
+  if (!admLoggedIn) { openAdminLogin(); return; }
+  document.getElementById('cms-ov').classList.add('op');
+}
+
+/* ═══ PRODUCT MANAGEMENT — backed by Netlify Blobs ═══ */
+const PRODUCTS_ENDPOINT = '/.netlify/functions/products';
+let pendingMediaFiles = [];
+let pendingSizeChartFile = null;
+
+// Load products from the server on page load (works for all visitors, not just admin)
+document.addEventListener('DOMContentLoaded', loadProducts);
+
+async function loadProducts() {
+  const list = document.getElementById('product-list');
+  if (!list) return;
+  try {
+    const res = await fetch(PRODUCTS_ENDPOINT);
+    const data = await res.json();
+    if (!data.products) return;
+    list.innerHTML = '';
+    if (data.products.length === 0) {
+      list.innerHTML = '<p style="font-family:var(--ff-l);font-style:italic;color:var(--muted);padding:1rem 0;">No products yet — add your first piece above.</p>';
+      return;
+    }
+    data.products.forEach(p => list.appendChild(renderProductCard(p)));
+  } catch (err) {
+    console.error('Failed to load products:', err);
+  }
+}
+
+function renderProductCard(p) {
+  const card = document.createElement('div');
+  card.className = 'cpc';
+  card.dataset.pid = p.sku;
+  const mediaCount = (p.media || []).length;
+  card.innerHTML = `
+    <div class="cpsw ${p.swatch || 's1'}"></div>
+    <div class="cpi">
+      <div class="n">${escapeHtml(p.name)}</div>
+      <div class="m">₹${escapeHtml(String(p.price))} · ${String(p.status || 'Active').toUpperCase()} · ${escapeHtml(p.sku)}${mediaCount ? ' · '+mediaCount+' img' : ''}${p.sizeChart ? ' · size chart ✓' : ''}</div>
+    </div>
+    <div class="cpa">
+      <button class="ib">✏</button>
+      <button class="ib dl" onclick="deleteProduct(this,'${p.sku}','${escapeHtml(p.name).replace(/'/g,"\\'")}')">🗑</button>
+    </div>`;
+  return card;
+}
+
+function handleMediaPreview(input) {
+  const grid = document.getElementById('np-media-preview');
+  grid.innerHTML = '';
+  pendingMediaFiles = Array.from(input.files || []).slice(0, 6); // cap at 6 images
+  pendingMediaFiles.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      grid.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function handleSizeChartPreview(input) {
+  const grid = document.getElementById('np-sizechart-preview');
+  grid.innerHTML = '';
+  const file = input.files && input.files[0];
+  pendingSizeChartFile = file || null;
+  if (!file) return;
+
+  if (file.type === 'application/pdf') {
+    const box = document.createElement('div');
+    box.className = 'npc-pdf';
+    box.textContent = 'PDF';
+    grid.appendChild(box);
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      grid.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Compress + resize an image file to a small base64 data URL, so we don't blow past Blob/function payload limits
+function fileToCompressedDataURL(file, maxDim = 800, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          const ratio = Math.min(maxDim / width, maxDim / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function addProduct() {
+  const name = document.getElementById('np-name').value.trim();
+  const sku  = document.getElementById('np-sku').value.trim();
+  const price = document.getElementById('np-price').value.trim();
+  const status = document.getElementById('np-status').value;
+  const submitBtn = document.querySelector('#pane-products .crow .cbtn2');
+
+  if (!name || !sku || !price) {
+    toast('Please fill in Product Name, SKU, and Price.');
+    return;
+  }
+
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  if (!token) {
+    toast('Your session expired. Please log in again.');
+    openAdminLogin();
+    return;
+  }
+
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'SAVING…'; }
+
+  try {
+    // Compress media images before sending
+    const mediaDataUrls = [];
+    for (const file of pendingMediaFiles) {
+      mediaDataUrls.push(await fileToCompressedDataURL(file, 800, 0.72));
+    }
+    let sizeChartDataUrl = null;
+    if (pendingSizeChartFile) {
+      if (pendingSizeChartFile.type === 'application/pdf') {
+        toast('Size chart PDFs aren\u2019t stored yet — please use an image for now.');
+      } else {
+        sizeChartDataUrl = await fileToCompressedDataURL(pendingSizeChartFile, 1000, 0.75);
+      }
+    }
+
+    const sizes = Array.from(document.querySelectorAll('.np-size-row input:checked')).map(c => c.value);
+    const swatchClasses = ['s1','s2','s3','s6'];
+    const swatch = swatchClasses[Math.floor(Math.random() * swatchClasses.length)];
+
+    const payload = {
+      sku, name, price,
+      comparePrice: document.getElementById('np-compare').value.trim(),
+      category: document.getElementById('np-cat').value,
+      status,
+      fabric: document.getElementById('np-fabric').value.trim(),
+      colour: document.getElementById('np-colour').value.trim(),
+      description: document.getElementById('np-desc').value.trim(),
+      badge: document.getElementById('np-badge').value,
+      sizes, swatch,
+      media: mediaDataUrls,
+      sizeChart: sizeChartDataUrl,
+    };
+
+    const res = await fetch(PRODUCTS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (res.status === 201) {
+      const list = document.getElementById('product-list');
+      const empty = list.querySelector('p');
+      if (empty) empty.remove();
+      list.prepend(renderProductCard(data.product));
+      toast(`✦ "${name}" added to your collection.`);
+      clearProductForm();
+    } else if (res.status === 409) {
+      toast(`SKU "${sku}" already exists. Use a unique SKU.`);
+    } else if (res.status === 401) {
+      toast('Session expired. Please log in again.');
+      openAdminLogin();
+    } else {
+      toast(data.error || 'Something went wrong saving the product.');
+    }
+  } catch (err) {
+    console.error('Add product error:', err);
+    toast('Connection error — could not save the product.');
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '+ ADD PRODUCT'; }
+  }
+}
+
+function saveDraft() {
+  const name = document.getElementById('np-name').value.trim();
+  if (!name) {
+    toast('Add at least a product name to save a draft.');
+    return;
+  }
+  toast(`Draft "${name}" saved locally (drafts aren\u2019t published to the store).`);
+}
+
+function clearProductForm() {
+  ['np-name','np-sku','np-price','np-compare','np-fabric','np-colour','np-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('np-cat').selectedIndex = 0;
+  document.getElementById('np-status').selectedIndex = 0;
+  document.getElementById('np-badge').value = '';
+  document.querySelectorAll('.np-size-row input:checked').forEach(c => c.checked = false);
+  document.getElementById('np-media').value = '';
+  document.getElementById('np-sizechart').value = '';
+  document.getElementById('np-media-preview').innerHTML = '';
+  document.getElementById('np-sizechart-preview').innerHTML = '';
+  pendingMediaFiles = [];
+  pendingSizeChartFile = null;
+}
+
+async function deleteProduct(btn, sku, name) {
+  if (!confirm(`Remove "${name}" from your store? This cannot be undone.`)) return;
+
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  if (!token) {
+    toast('Your session expired. Please log in again.');
+    openAdminLogin();
+    return;
+  }
+
+  const card = btn.closest('.cpc');
+  card.classList.add('removing');
+
+  try {
+    const res = await fetch(PRODUCTS_ENDPOINT, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ sku }),
+    });
+    if (res.ok) {
+      setTimeout(() => card.remove(), 250);
+      toast(`"${name}" removed.`);
+    } else {
+      card.classList.remove('removing');
+      const data = await res.json().catch(() => ({}));
+      toast(data.error || 'Could not delete product.');
+    }
+  } catch (err) {
+    card.classList.remove('removing');
+    console.error('Delete error:', err);
+    toast('Connection error — could not delete the product.');
+  }
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+function closeCMS(){document.getElementById('cms-ov').classList.remove('op');}
+function cTab(id,el){
+  document.querySelectorAll('.cpane').forEach(p=>p.classList.remove('ac'));
+  document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('ac'));
+  document.getElementById('pane-'+id).classList.add('ac');el.classList.add('ac');
+}
+function toast(msg){
+  const t=document.getElementById('tst');t.textContent=msg;t.classList.add('sh');
+  clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove('sh'),2800);
+}
+function setTheme(name,el){
+  document.body.className=name||'';
+  document.querySelectorAll('.ths').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');
+  toast('Theme: '+el.querySelector('.thl').textContent);
+}
+function setVar(prop,val){
+  document.documentElement.style.setProperty(prop,val);
+  toast('Colour updated — save theme to persist');
+}
+</script>
+</body>
+</html>
