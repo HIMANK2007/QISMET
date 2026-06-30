@@ -34,12 +34,7 @@ exports.handler = async (event) => {
     return { statusCode: 204, headers, body: '' };
   }
 
-  const store = getStore({
-    name: 'qismet-products',
-    consistency: 'strong',
-    siteID: process.env.NETLIFY_SITE_ID,
-    token: process.env.NETLIFY_API_TOKEN,
-  });
+  const store = getStore({ name: 'qismet-products', consistency: 'strong' });
 
   // ── GET: list products (public, no auth needed) ──
   if (event.httpMethod === 'GET') {
