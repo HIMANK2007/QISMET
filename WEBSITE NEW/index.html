@@ -616,8 +616,9 @@ footer{background:var(--ink);padding:4rem 3rem 2rem;}
 
 <section class="drops">
   <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:3rem"><div><div class="sec-e" style="text-align:left">JUST ARRIVED</div><h2 class="sec-t" style="text-align:left">Fresh Drops</h2></div><a href="#" class="bg2">VIEW ALL →</a></div>
-  <div class="pgrid">
-    <div class="pc"><div class="pi s1"><div class="pb">NEW</div><button class="pq">+ QUICK ADD</button></div><div class="pn">Crimson Zardozi Sherwani</div><div class="pp">₹ 18,499</div></div>
+  <div class="pgrid" id="storefront-grid">
+  <p style="font-family:var(--ff-l);font-style:italic;color:var(--muted);padding:1rem 0;grid-column:1/-1;">Loading collection…</p>
+</div>
     <div class="pc"><div class="pi s2"><button class="pq">+ QUICK ADD</button></div><div class="pn">Indigo Block-Print Kurta Set</div><div class="pp"><span class="or">₹ 6,999</span>₹ 5,499</div></div>
     <div class="pc"><div class="pi s3"><div class="pb">BESTSELLER</div><button class="pq">+ QUICK ADD</button></div><div class="pn">Forest Bandhgala Jacket</div><div class="pp">₹ 9,899</div></div>
     <div class="pc"><div class="pi s4"><button class="pq">+ QUICK ADD</button></div><div class="pn">Amber Brocade Nehru Jacket</div><div class="pp">₹ 7,299</div></div>
@@ -1121,7 +1122,63 @@ let pendingMediaFiles = [];
 let pendingSizeChartFile = null;
 
 // Load products from the server on page load (works for all visitors, not just admin)
-document.addEventListener('DOMContentLoaded', loadProducts);
+document.addEventListener('DOMContentLoaded', () => {
+  loadProducts();
+  loadStorefrontProducts();
+});
+
+async function loadStorefrontProducts() {
+  const grid = document.getElementById('storefront-grid');
+  if (!grid) return;
+  try {
+    const res = await fetch(PRODUCTS_ENDPOINT);
+    const data = await res.json();
+    const products = (data.products || []).filter(p => p.status !== 'Draft');
+
+    if (products.length === 0) {
+      grid.innerHTML = '<p style="font-family:var(--ff-l);font-style:italic;color:var(--muted);padding:1rem 0;grid-column:1/-1;">No products yet — check back soon.</p>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    products.forEach(p => grid.appendChild(renderStorefrontCard(p)));
+
+    document.querySelectorAll('#storefront-grid .pq').forEach(b => b.addEventListener('click', e => {
+      e.stopPropagation();
+      if (b.textContent.includes('NOTIFY')) return;
+      ct++; cb.textContent = `BAG (${ct})`;
+      const o = b.textContent; b.textContent = '✓ ADDED';
+      setTimeout(() => b.textContent = o, 1500);
+    }));
+  } catch (err) {
+    console.error('Failed to load storefront products:', err);
+    grid.innerHTML = '<p style="font-family:var(--ff-l);font-style:italic;color:var(--muted);padding:1rem 0;grid-column:1/-1;">Could not load products.</p>';
+  }
+}
+
+function renderStorefrontCard(p) {
+  const card = document.createElement('div');
+  card.className = 'pc';
+  const isSoldOut = (p.status || '').toLowerCase() === 'sold out';
+  const img = (p.media && p.media[0]) ? `style="background-image:url('${p.media[0]}');background-size:cover;background-position:center"` : '';
+  const swatchClass = img ? '' : (p.swatch || 's1');
+  const badgeHtml = p.badge ? `<div class="pb ${isSoldOut ? 'so' : ''}">${escapeHtml(p.badge)}</div>` : (isSoldOut ? '<div class="pb so">SOLD OUT</div>' : '');
+  const priceHtml = p.comparePrice
+    ? `<span class="or">₹ ${escapeHtml(String(p.comparePrice))}</span>₹ ${escapeHtml(String(p.price))}`
+    : `₹ ${escapeHtml(String(p.price))}`;
+  const btnHtml = isSoldOut
+    ? `<button class="pq" style="background:rgba(46,125,107,.2);color:#2E7D6B">NOTIFY ME</button>`
+    : `<button class="pq">+ QUICK ADD</button>`;
+
+  card.innerHTML = `
+    <div class="pi ${swatchClass}" ${img}>
+      ${badgeHtml}
+      ${btnHtml}
+    </div>
+    <div class="pn">${escapeHtml(p.name)}</div>
+    <div class="pp">${priceHtml}</div>`;
+  return card;
+}
 
 async function loadProducts() {
   const list = document.getElementById('product-list');
