@@ -73,7 +73,7 @@ exports.handler = async (event) => {
 
     const existing = await store.get(sku, { type: 'json' });
     if (existing) {
-      return { statusCode: 409, headers, body: JSON.stringify({ error: `SKU "${sku}" already exists` }) };
+      return { statusCode: 409, headers, body: JSON.stringify({ error: SKU "${sku}" already exists }) };
     }
 
     const product = {
